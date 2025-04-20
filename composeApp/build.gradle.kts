@@ -7,6 +7,9 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+
+    id("com.google.gms.google-services")
+
 }
 
 kotlin {
@@ -25,6 +28,7 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(project.dependencies.platform(libs.android.firebase.bom))
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -36,6 +40,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.kotlin.test)
+            implementation(libs.gitlive.firebase.firestore)
+            implementation(libs.kotlinx.coroutines.core)
 
         }
         desktopMain.dependencies {
