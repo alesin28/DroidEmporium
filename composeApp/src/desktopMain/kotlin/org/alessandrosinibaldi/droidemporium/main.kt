@@ -8,6 +8,9 @@ import dev.gitlive.firebase.FirebaseOptions
 import dev.gitlive.firebase.initialize
 import android.app.Application
 import dev.gitlive.firebase.app
+import org.alessandrosinibaldi.droidemporium.app.AdminApp
+import org.alessandrosinibaldi.droidemporium.di.appModule
+import org.koin.core.context.startKoin
 import java.io.File
 import java.io.FileInputStream
 import java.util.Properties
@@ -19,9 +22,9 @@ fun main() {
     FileInputStream(configFile).use { input ->
             properties.load(input)
         }
-    var apiKey: String = properties.getProperty("firebase.apiKey")
-    var appId: String = properties.getProperty("firebase.applicationId")
-    var projectId: String? = properties.getProperty("firebase.projectId")
+    var apiKey: String = properties.getProperty("apiKey")
+    var appId: String = properties.getProperty("applicationId")
+    var projectId: String? = properties.getProperty("projectId")
 
     try {
         FirebasePlatform.initializeFirebasePlatform(object : FirebasePlatform() {
@@ -51,13 +54,16 @@ fun main() {
         return
     }
 
+    startKoin {
+        modules(appModule)
+    }
 
     application {
         Window(
             onCloseRequest = ::exitApplication,
             title = "DroidEmporium",
         ) {
-            App()
+            AdminApp()
         }
     }
 }
