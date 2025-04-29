@@ -37,29 +37,41 @@ fun ProductScreen(
     navController: NavHostController
 ) {
     val products by viewModel.products.collectAsState()
+    val minPrice by viewModel.minPriceFilter.collectAsState()
+    val maxPrice by viewModel.maxPriceFilter.collectAsState()
 
     val onNavigateToAddProduct: () -> Unit = {
         navController.navigate(Route.ProductAdd)
     }
     productScreenContent(
         products = products,
+        minPrice = minPrice,
+        maxPrice = maxPrice,
         deleteProduct = viewModel::deleteProduct,
         onNavigateToAddProduct = onNavigateToAddProduct,
-        onSortClick = viewModel::updateSort
+        onSortClick = viewModel::updateSort,
+        onMinPriceFilterChange = viewModel::updateMinPriceFilter,
+        onMaxPriceFilterChange = viewModel::updateMaxPriceFilter
     )
 }
 
 @Composable
 fun productScreenContent(
     products: List<Product>,
+    minPrice: Double,
+    maxPrice: Double,
     deleteProduct: (Product) -> Unit,
     onNavigateToAddProduct: () -> Unit,
-    onSortClick: (SortColumn) -> Unit
+    onSortClick: (SortColumn) -> Unit,
+    onMinPriceFilterChange: (Double) -> Unit,
+    onMaxPriceFilterChange: (Double) -> Unit,
 ) {
     val nameWeight = 3f
     val descriptionWeight = 3f
     val priceWeight = 1f
     val actionsWeight = 1f
+    var minPriceInput by remember { mutableStateOf(minPrice.toString()) }
+    var maxPriceInput by remember { mutableStateOf(maxPrice.toString()) }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -146,6 +158,53 @@ fun productScreenContent(
                     Button(onClick = onNavigateToAddProduct) {
                         Text("Add Product")
                     }
+                    Text(
+                        text = "Filters",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Text(
+                        text = "Price",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(IntrinsicSize.Min)
+                            .padding(8.dp)
+
+                    ) {
+                        OutlinedTextField(
+                            value = minPriceInput,
+                            onValueChange = { newPrice ->
+                                minPriceInput = newPrice
+                                val newPriceDouble = newPrice.toDoubleOrNull()
+                                if (newPriceDouble != null) {
+                                    onMinPriceFilterChange(newPriceDouble)
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                            label = { Text("Min Price") },
+                        )
+                        HorizontalDivider(
+                            modifier = Modifier
+                                .padding(horizontal = 4.dp)
+                                .weight(0.1f),
+                        )
+                        OutlinedTextField(
+                            value = maxPriceInput,
+                            onValueChange = { newPrice ->
+                                maxPriceInput = newPrice
+                                val newPriceDouble = newPrice.toDoubleOrNull()
+                                if (newPriceDouble != null) {
+                                    onMaxPriceFilterChange(newPriceDouble)
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                            label = { Text("Max Price") }
+                        )
+                    }
+
+
                 }
             }
         }
