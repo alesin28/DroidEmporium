@@ -41,6 +41,8 @@ fun ProductScreen(
     val maxPrice by viewModel.maxPriceFilter.collectAsState()
     val minStock by viewModel.minStockFilter.collectAsState()
     val maxStock by viewModel.maxStockFilter.collectAsState()
+    val active by viewModel.isActiveFilter.collectAsState()
+    val inactive by viewModel.isInactiveFilter.collectAsState()
     val query by viewModel.searchQuery.collectAsState()
 
     val onNavigateToAddProduct: () -> Unit = {
@@ -52,6 +54,8 @@ fun ProductScreen(
         maxPrice = maxPrice,
         minStock = minStock,
         maxStock = maxStock,
+        active = active,
+        inactive = inactive,
         query = query,
         deleteProduct = viewModel::deleteProduct,
         onNavigateToAddProduct = onNavigateToAddProduct,
@@ -60,6 +64,8 @@ fun ProductScreen(
         onMaxPriceFilterChange = viewModel::updateMaxPriceFilter,
         onMinStockFilterChange = viewModel::updateMinStockFilter,
         onMaxStockFilterChange = viewModel::updateMaxStockFilter,
+        onActiveFilterChange = viewModel::updateActiveFilter,
+        onInactiveFilterChange = viewModel::updateInactiveFilter,
         onProductSearch = viewModel::updateQuery
     )
 }
@@ -71,6 +77,8 @@ fun productScreenContent(
     maxPrice: Double,
     minStock: Int,
     maxStock: Int,
+    active: Boolean,
+    inactive: Boolean,
     query: String,
     deleteProduct: (Product) -> Unit,
     onNavigateToAddProduct: () -> Unit,
@@ -79,6 +87,8 @@ fun productScreenContent(
     onMaxPriceFilterChange: (Double) -> Unit,
     onMinStockFilterChange: (Int) -> Unit,
     onMaxStockFilterChange: (Int) -> Unit,
+    onActiveFilterChange: (Boolean) -> Unit,
+    onInactiveFilterChange: (Boolean) -> Unit,
     onProductSearch: (String) -> Unit,
 ) {
     val nameWeight = 3f
@@ -285,6 +295,28 @@ fun productScreenContent(
                                 },
                                 modifier = Modifier.weight(1f),
                                 label = { Text("Max Stock") }
+                            )
+                        }
+                        Row {
+                            Text("Show Active Products")
+                            Checkbox(
+                                checked = active,
+                                onCheckedChange = { newState ->
+                                    if (!active && inactive || (active && inactive)) {
+                                        onActiveFilterChange(newState)
+                                    }
+                                }
+                            )
+                        }
+                        Row {
+                            Text("Show Inactive Products")
+                            Checkbox(
+                                checked = inactive,
+                                onCheckedChange = { newState ->
+                                    if (!inactive && active || active) {
+                                        onInactiveFilterChange(newState)
+                                    }
+                                }
                             )
                         }
 

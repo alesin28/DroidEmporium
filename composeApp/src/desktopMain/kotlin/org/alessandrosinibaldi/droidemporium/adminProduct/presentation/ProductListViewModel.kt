@@ -50,6 +50,11 @@ class ProductListViewModel(
     private val _searchQuery = MutableStateFlow<String>("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
+    private val _isActiveFilter = MutableStateFlow<Boolean>(true)
+    val isActiveFilter: StateFlow<Boolean> = _isActiveFilter.asStateFlow()
+    private val _isInactiveFilter = MutableStateFlow<Boolean>(true)
+    val isInactiveFilter: StateFlow<Boolean> = _isInactiveFilter.asStateFlow()
+
     private val sortStateFlow: Flow<SortState> = combine(
         _sortColumn,
         _sortDirection,
@@ -74,6 +79,16 @@ class ProductListViewModel(
         )
     }
 
+    private val activeFilterStateFlow: Flow<ActiveFilterState> = combine(
+        _isActiveFilter,
+        _isInactiveFilter,
+    ) { isActiveFilter, isInactiveFilter ->
+        ActiveFilterState(
+            isActive = isActiveFilter,
+            isInactive = isInactiveFilter
+        )
+    }
+
 
     //private val _products = MutableStateFlow<List<Product>>(emptyList())
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
@@ -83,8 +98,9 @@ class ProductListViewModel(
                 repository.searchProducts(productQuery)
             },
         sortStateFlow,
-        filterStateFlow
-    ) { productsList, sortState, filterState ->
+        filterStateFlow,
+        activeFilterStateFlow
+    ) { productsList, sortState, filterState, activeFilterState ->
         val sortedList = when (sortState.sortColumn) {
             SortColumn.NAME -> {
                 if (sortState.sortDirection == SortDirection.ASCENDING) {
@@ -113,10 +129,25 @@ class ProductListViewModel(
             SortColumn.NONE -> productsList
         }
 
-        sortedList.filter { product ->
-            product.price >= filterState.minPrice && product.price <= filterState.maxPrice
-                    && product.stock >= filterState.minStock && product.stock <= filterState.maxStock
+        if(activeFilterState.isActive && activeFilterState.isInactive) {
+            sortedList.filter { product ->
+                product.price >= filterState.minPrice && product.price <= filterState.maxPrice
+                        && product.stock >= filterState.minStock && product.stock <= filterState.maxStock
+            }
+        } else if (activeFilterState.isActive) {
+            sortedList.filter { product ->
+                product.price >= filterState.minPrice && product.price <= filterState.maxPrice
+                        && product.stock >= filterState.minStock && product.stock <= filterState.maxStock
+                        && product.isActive
+            }
+        } else {
+            sortedList.filter { product ->
+                product.price >= filterState.minPrice && product.price <= filterState.maxPrice
+                        && product.stock >= filterState.minStock && product.stock <= filterState.maxStock
+                        && !product.isActive
+            }
         }
+
     }.stateIn(
         scope = viewModelScope,
         started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
@@ -160,6 +191,14 @@ class ProductListViewModel(
         _searchQuery.value = query
     }
 
+    fun updateActiveFilter(isActive: Boolean) {
+        _isActiveFilter.value = isActive
+    }
+
+    fun updateInactiveFilter(isInactive: Boolean) {
+        _isInactiveFilter.value = isInactive
+    }
+
     fun deleteProduct(product: Product) {
         viewModelScope.launch {
             repository.deleteProduct(product)
@@ -176,6 +215,11 @@ class ProductListViewModel(
         val maxPrice: Double,
         val minStock: Int,
         val maxStock: Int
+    )
+
+    data class ActiveFilterState(
+        val isActive: Boolean,
+        val isInactive: Boolean
     )
 
 }
