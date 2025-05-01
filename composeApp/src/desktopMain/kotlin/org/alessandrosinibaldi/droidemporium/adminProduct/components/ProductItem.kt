@@ -26,6 +26,9 @@ fun ProductItem(
     val nameWeight = 3f
     val descriptionWeight = 3f
     val priceWeight = 1f
+    val stockWeight = 1f
+    val activeWeight = 1f
+    val actionsWeight = 1f
 
 
     Row(
@@ -66,7 +69,28 @@ fun ProductItem(
         VerticalDivider(
             thickness = 1.dp
         )
+        Text(
+            modifier = Modifier.padding(horizontal = 8.dp)
+                .weight(stockWeight),
+            text = "${product.stock}",
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        VerticalDivider(
+            thickness = 1.dp
+        )
+        Text(
+            modifier = Modifier.padding(horizontal = 8.dp)
+                .weight(activeWeight),
+            text = if (product.isActive) "Active" else "Inactive",
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        VerticalDivider(
+            thickness = 1.dp
+        )
         Button(
+            modifier = Modifier.weight(actionsWeight),
             onClick = { deleteProduct(product) }
         ) {
             Text(text = "Delete")

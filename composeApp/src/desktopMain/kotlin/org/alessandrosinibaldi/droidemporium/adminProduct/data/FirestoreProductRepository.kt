@@ -17,10 +17,22 @@ class FirestoreProductRepository : ProductRepository {
                     id = documentSnapshot.id,
                     name = documentSnapshot.data<Product>().name,
                     description = documentSnapshot.data<Product>().description,
-                    price = documentSnapshot.data<Product>().price.toDouble()
+                    price = documentSnapshot.data<Product>().price.toDouble(),
+                    stock = documentSnapshot.data<Product>().stock.toInt(),
+                    isActive = documentSnapshot.data<Product>().isActive
                 )
             }
-            emit(products)
+
+            val filteredProducts = if (!query.isNullOrBlank()) {
+                val lowerCaseQuery = query.lowercase()
+                products.filter { product ->
+                    product.name.lowercase().contains(lowerCaseQuery.toString())
+                }
+            } else {
+                products
+            }
+
+            emit(filteredProducts)
         }
         //return products
     }
@@ -30,9 +42,22 @@ class FirestoreProductRepository : ProductRepository {
         firestore.collection("products").document(product.id.toString()).delete()
     }
 
-    override suspend fun addProduct(name: String, description: String?, price: Double) {
+    override suspend fun addProduct(
+        name: String,
+        description: String?,
+        price: Double,
+        stock: Int,
+        isActive: Boolean
+    ) {
         println("Adding product: $name, $description, $price")
-        val ref = firestore.collection("products").add(Product(name = name, description = description.toString(), price = price))
+        val ref = firestore.collection("products")
+            .add(
+                Product(
+                    name = name, description = description.toString(), price = price,
+                    stock = stock,
+                    isActive = isActive
+                )
+            )
         println("Product added with ID: ${ref.id}")
     }
 }

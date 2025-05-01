@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,9 +37,13 @@ fun AddProductScreen(
         name = viewModel.name,
         description = viewModel.description,
         price = viewModel.price,
+        stock = viewModel.stock,
+        isActive = viewModel.isActive,
         onNameChange = viewModel::onNameChange,
         onDescriptionChange = viewModel::onDescriptionChange,
         onPriceChange = viewModel::onPriceChange,
+        onStockChange = viewModel::onStockChange,
+        onStatusChange = viewModel::onStatusChange,
         onAddProduct = viewModel::addProduct,
         isSaving = viewModel.isSaving
     )
@@ -49,12 +54,19 @@ fun AddProductScreenContent(
     name: String,
     description: String,
     price: String,
+    stock: String,
+    isActive: Boolean,
     onNameChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
     onPriceChange: (String) -> Unit,
+    onStockChange: (String) -> Unit,
+    onStatusChange: (Boolean) -> Unit,
     onAddProduct: () -> Unit,
-    isSaving: Boolean
+    isSaving: Boolean,
+
 ) {
+
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -80,6 +92,18 @@ fun AddProductScreenContent(
                 value = price,
                 label = { Text("Price") },
                 onValueChange = onPriceChange,
+            )
+            OutlinedTextField(
+                value = stock.toString(),
+                label = { Text("Stock") },
+                onValueChange = onStockChange,
+            )
+            Text("Active")
+            Checkbox(
+                checked = isActive,
+                onCheckedChange = {
+                    onStatusChange(!isActive)
+                }
             )
 
             Button(

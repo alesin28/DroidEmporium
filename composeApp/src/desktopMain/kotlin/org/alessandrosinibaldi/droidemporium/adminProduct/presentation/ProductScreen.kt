@@ -39,6 +39,7 @@ fun ProductScreen(
     val products by viewModel.products.collectAsState()
     val minPrice by viewModel.minPriceFilter.collectAsState()
     val maxPrice by viewModel.maxPriceFilter.collectAsState()
+    val query by viewModel.searchQuery.collectAsState()
 
     val onNavigateToAddProduct: () -> Unit = {
         navController.navigate(Route.ProductAdd)
@@ -47,11 +48,13 @@ fun ProductScreen(
         products = products,
         minPrice = minPrice,
         maxPrice = maxPrice,
+        query = query,
         deleteProduct = viewModel::deleteProduct,
         onNavigateToAddProduct = onNavigateToAddProduct,
         onSortClick = viewModel::updateSort,
         onMinPriceFilterChange = viewModel::updateMinPriceFilter,
-        onMaxPriceFilterChange = viewModel::updateMaxPriceFilter
+        onMaxPriceFilterChange = viewModel::updateMaxPriceFilter,
+        onProductSearch = viewModel::updateQuery
     )
 }
 
@@ -60,16 +63,20 @@ fun productScreenContent(
     products: List<Product>,
     minPrice: Double,
     maxPrice: Double,
+    query: String,
     deleteProduct: (Product) -> Unit,
     onNavigateToAddProduct: () -> Unit,
     onSortClick: (SortColumn) -> Unit,
     onMinPriceFilterChange: (Double) -> Unit,
     onMaxPriceFilterChange: (Double) -> Unit,
+    onProductSearch: (String) -> Unit,
 ) {
     val nameWeight = 3f
     val descriptionWeight = 3f
     val priceWeight = 1f
     val actionsWeight = 1f
+    val stockWeight = 1f
+    val activeWeight = 1f
     var minPriceInput by remember { mutableStateOf(minPrice.toString()) }
     var maxPriceInput by remember { mutableStateOf(maxPrice.toString()) }
 
@@ -82,134 +89,183 @@ fun productScreenContent(
                 .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Row(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Column(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .weight(2f)
+            Column {
 
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(color = Color.LightGray)
-                            .padding(8.dp)
-                            .height(IntrinsicSize.Min)
-                    ) {
-                        TableHeader(
-                            text = "Name",
-                            weight = nameWeight,
-                            isSortable = true,
-                            onClick = { onSortClick(SortColumn.NAME) }
-
-                        )
-                        VerticalDivider(
-                            thickness = 1.dp,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                        TableHeader(
-                            text = "Description",
-                            weight = descriptionWeight,
-                            isSortable = false
-                        )
-                        VerticalDivider(
-                            thickness = 1.dp,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                        TableHeader(
-                            text = "Price",
-                            weight = priceWeight,
-                            isSortable = true,
-                            onClick = { onSortClick(SortColumn.PRICE) }
-                        )
-                        VerticalDivider(
-                            thickness = 1.dp,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                        TableHeader(
-                            text = "Actions",
-                            weight = actionsWeight,
-                            isSortable = false
-                        )
-                    }
-
-                    HorizontalDivider(thickness = 1.dp)
-                    if (!products.isEmpty()) {
-                        LazyColumn(
-                            modifier = Modifier.background(color = MaterialTheme.colorScheme.surfaceVariant)
-                        ) {
-                            items(products) { product ->
-                                ProductItem(
-                                    product = product,
-                                    deleteProduct = deleteProduct
-                                )
-                                HorizontalDivider(thickness = 1.dp)
-                            }
-                        }
-                    } else {
-                        Text("No products available")
-                    }
+                Row {
+                    ProductSearchBar(
+                        query = query,
+                        onProductSearch = onProductSearch
+                    )
                 }
-                Column(
-                    modifier = Modifier.weight(1f)
+
+                Row(
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    Button(onClick = onNavigateToAddProduct) {
-                        Text("Add Product")
-                    }
-                    Text(
-                        text = "Filters",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    Text(
-                        text = "Price",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Row(
+                    Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(IntrinsicSize.Min)
-                            .padding(8.dp)
+                            .padding(16.dp)
+                            .weight(3f)
 
                     ) {
-                        OutlinedTextField(
-                            value = minPriceInput,
-                            onValueChange = { newPrice ->
-                                minPriceInput = newPrice
-                                val newPriceDouble = newPrice.toDoubleOrNull()
-                                if (newPriceDouble != null) {
-                                    onMinPriceFilterChange(newPriceDouble)
-                                }
-                            },
-                            modifier = Modifier.weight(1f),
-                            label = { Text("Min Price") },
-                        )
-                        HorizontalDivider(
+                        Row(
                             modifier = Modifier
-                                .padding(horizontal = 4.dp)
-                                .weight(0.1f),
-                        )
-                        OutlinedTextField(
-                            value = maxPriceInput,
-                            onValueChange = { newPrice ->
-                                maxPriceInput = newPrice
-                                val newPriceDouble = newPrice.toDoubleOrNull()
-                                if (newPriceDouble != null) {
-                                    onMaxPriceFilterChange(newPriceDouble)
+                                .fillMaxWidth()
+                                .background(color = Color.LightGray)
+                                .padding(8.dp)
+                                .height(IntrinsicSize.Min)
+                        ) {
+                            TableHeader(
+                                text = "Name",
+                                weight = nameWeight,
+                                isSortable = true,
+                                onClick = { onSortClick(SortColumn.NAME) }
+
+                            )
+                            VerticalDivider(
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                            TableHeader(
+                                text = "Description",
+                                weight = descriptionWeight,
+                                isSortable = false
+                            )
+                            VerticalDivider(
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                            TableHeader(
+                                text = "Price",
+                                weight = priceWeight,
+                                isSortable = true,
+                                onClick = { onSortClick(SortColumn.PRICE) }
+                            )
+                            VerticalDivider(
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                            TableHeader(
+                                text = "Stock",
+                                weight = stockWeight,
+                                isSortable = true,
+                                onClick = { onSortClick(SortColumn.STOCK) }
+                            )
+                            VerticalDivider(
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                            TableHeader(
+                                text = "Status",
+                                weight = activeWeight,
+                                isSortable = false
+                            )
+                            VerticalDivider(
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                            TableHeader(
+                                text = "Actions",
+                                weight = actionsWeight,
+                                isSortable = false
+                            )
+                        }
+
+                        HorizontalDivider(thickness = 1.dp)
+                        if (!products.isEmpty()) {
+                            LazyColumn(
+                                modifier = Modifier.background(color = MaterialTheme.colorScheme.surfaceVariant)
+                            ) {
+                                items(products) { product ->
+                                    ProductItem(
+                                        product = product,
+                                        deleteProduct = deleteProduct
+                                    )
+                                    HorizontalDivider(thickness = 1.dp)
                                 }
-                            },
-                            modifier = Modifier.weight(1f),
-                            label = { Text("Max Price") }
-                        )
+                            }
+                        } else {
+                            Text("No products available")
+                        }
                     }
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Button(onClick = onNavigateToAddProduct) {
+                            Text("Add Product")
+                        }
+                        Text(
+                            text = "Filters",
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Text(
+                            text = "Price",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(IntrinsicSize.Min)
+                                .padding(8.dp)
+
+                        ) {
+                            OutlinedTextField(
+                                value = minPriceInput,
+                                onValueChange = { newPrice ->
+                                    minPriceInput = newPrice
+                                    val newPriceDouble = newPrice.toDoubleOrNull()
+                                    if (newPriceDouble != null) {
+                                        onMinPriceFilterChange(newPriceDouble)
+                                    }
+                                },
+                                modifier = Modifier.weight(1f),
+                                label = { Text("Min Price") },
+                            )
+                            HorizontalDivider(
+                                modifier = Modifier
+                                    .padding(horizontal = 4.dp)
+                                    .weight(0.1f),
+                            )
+                            OutlinedTextField(
+                                value = maxPriceInput,
+                                onValueChange = { newPrice ->
+                                    maxPriceInput = newPrice
+                                    val newPriceDouble = newPrice.toDoubleOrNull()
+                                    if (newPriceDouble != null) {
+                                        onMaxPriceFilterChange(newPriceDouble)
+                                    }
+                                },
+                                modifier = Modifier.weight(1f),
+                                label = { Text("Max Price") }
+                            )
+                        }
 
 
+                    }
                 }
             }
-        }
 
+        }
     }
+}
+
+@Composable()
+fun ProductSearchBar(onProductSearch: (String) -> Unit, query: String) {
+    var productQuery by remember { mutableStateOf(query) }
+
+    OutlinedTextField(
+        value = productQuery,
+        onValueChange = { newQuery ->
+            productQuery = newQuery
+
+            onProductSearch(productQuery)
+        },
+        label = { Text("Search") },
+        modifier = Modifier.padding(vertical = 4.dp, horizontal = 50.dp)
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min)
+
+
+    )
 }
 
 @Composable
