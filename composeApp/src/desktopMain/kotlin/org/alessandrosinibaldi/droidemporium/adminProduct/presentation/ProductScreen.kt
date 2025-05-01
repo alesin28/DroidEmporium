@@ -39,6 +39,8 @@ fun ProductScreen(
     val products by viewModel.products.collectAsState()
     val minPrice by viewModel.minPriceFilter.collectAsState()
     val maxPrice by viewModel.maxPriceFilter.collectAsState()
+    val minStock by viewModel.minStockFilter.collectAsState()
+    val maxStock by viewModel.maxStockFilter.collectAsState()
     val query by viewModel.searchQuery.collectAsState()
 
     val onNavigateToAddProduct: () -> Unit = {
@@ -48,12 +50,16 @@ fun ProductScreen(
         products = products,
         minPrice = minPrice,
         maxPrice = maxPrice,
+        minStock = minStock,
+        maxStock = maxStock,
         query = query,
         deleteProduct = viewModel::deleteProduct,
         onNavigateToAddProduct = onNavigateToAddProduct,
         onSortClick = viewModel::updateSort,
         onMinPriceFilterChange = viewModel::updateMinPriceFilter,
         onMaxPriceFilterChange = viewModel::updateMaxPriceFilter,
+        onMinStockFilterChange = viewModel::updateMinStockFilter,
+        onMaxStockFilterChange = viewModel::updateMaxStockFilter,
         onProductSearch = viewModel::updateQuery
     )
 }
@@ -63,12 +69,16 @@ fun productScreenContent(
     products: List<Product>,
     minPrice: Double,
     maxPrice: Double,
+    minStock: Int,
+    maxStock: Int,
     query: String,
     deleteProduct: (Product) -> Unit,
     onNavigateToAddProduct: () -> Unit,
     onSortClick: (SortColumn) -> Unit,
     onMinPriceFilterChange: (Double) -> Unit,
     onMaxPriceFilterChange: (Double) -> Unit,
+    onMinStockFilterChange: (Int) -> Unit,
+    onMaxStockFilterChange: (Int) -> Unit,
     onProductSearch: (String) -> Unit,
 ) {
     val nameWeight = 3f
@@ -79,6 +89,8 @@ fun productScreenContent(
     val activeWeight = 1f
     var minPriceInput by remember { mutableStateOf(minPrice.toString()) }
     var maxPriceInput by remember { mutableStateOf(maxPrice.toString()) }
+    var minStockInput by remember { mutableStateOf(minStock.toString()) }
+    var maxStockInput by remember { mutableStateOf(maxStock.toString()) }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -236,6 +248,43 @@ fun productScreenContent(
                                 },
                                 modifier = Modifier.weight(1f),
                                 label = { Text("Max Price") }
+                            )
+                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(IntrinsicSize.Min)
+                                .padding(8.dp)
+
+                        ) {
+                            OutlinedTextField(
+                                value = minStockInput,
+                                onValueChange = { newStock ->
+                                    minStockInput = newStock
+                                    val newStockInt = newStock.toIntOrNull()
+                                    if (newStockInt != null) {
+                                        onMinStockFilterChange(newStockInt)
+                                    }
+                                },
+                                modifier = Modifier.weight(1f),
+                                label = { Text("Min Stock") },
+                            )
+                            HorizontalDivider(
+                                modifier = Modifier
+                                    .padding(horizontal = 4.dp)
+                                    .weight(0.1f),
+                            )
+                            OutlinedTextField(
+                                value = maxStockInput,
+                                onValueChange = { newStock ->
+                                    maxStockInput = newStock
+                                    val newStockInt = newStock.toIntOrNull()
+                                    if (newStockInt != null) {
+                                        onMaxStockFilterChange(newStockInt)
+                                    }
+                                },
+                                modifier = Modifier.weight(1f),
+                                label = { Text("Max Stock") }
                             )
                         }
 
