@@ -18,19 +18,19 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @Composable
-fun AddProductScreen(
+fun ProductFormScreen(
     navController: NavHostController,
     productId: String?
 ) {
 
-    val viewModel: AddProductViewModel = koinViewModel( // Use RENAMED ViewModel
+    val viewModel: ProductFormViewModel = koinViewModel( // Use RENAMED ViewModel
         parameters = { parametersOf(productId) } // Pass the productId here
     )
 
     LaunchedEffect(true) {
         viewModel.events.collect { event ->
             when (event) {
-                is AddProductEvent.NavigateBack -> {
+                is ProductFormEvent.NavigateBack -> {
                     println("NavigateBack event received, popping back stack.")
                     navController.popBackStack()
                 }
@@ -38,7 +38,7 @@ fun AddProductScreen(
         }
     }
 
-    AddProductScreenContent(
+    ProductFormScreenContent(
         name = viewModel.name,
         description = viewModel.description,
         price = viewModel.price,
@@ -55,7 +55,7 @@ fun AddProductScreen(
 }
 
 @Composable
-fun AddProductScreenContent(
+fun ProductFormScreenContent(
     name: String,
     description: String,
     price: String,

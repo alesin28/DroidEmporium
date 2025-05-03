@@ -11,11 +11,11 @@ import kotlinx.coroutines.launch
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.Product
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.ProductRepository
 
-sealed interface AddProductEvent {
-    data object NavigateBack : AddProductEvent
+sealed interface ProductFormEvent {
+    data object NavigateBack : ProductFormEvent
 }
 
-class AddProductViewModel(
+class ProductFormViewModel(
     private val repository: ProductRepository,
     private val productId: String?
 ) : ViewModel() {
@@ -38,7 +38,7 @@ class AddProductViewModel(
     }
 
 
-    private val _eventChannel = Channel<AddProductEvent>()
+    private val _eventChannel = Channel<ProductFormEvent>()
     val events = _eventChannel.receiveAsFlow()
 
     fun onNameChange(newName: String) {
@@ -85,7 +85,7 @@ class AddProductViewModel(
 
             }
 
-            _eventChannel.send(AddProductEvent.NavigateBack)
+            _eventChannel.send(ProductFormEvent.NavigateBack)
         }
 
     }

@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.AddProductScreen
+import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductFormScreen
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductScreen
 
 @Composable
@@ -21,10 +21,10 @@ fun AdminApp() {
             ProductScreen(navController = navController)
         }
 
-        composable<Route.ProductAdd> { backStackEntry ->
+        composable<Route.ProductForm> { backStackEntry ->
             val productId = backStackEntry.arguments?.getString("productId")
 
-            AddProductScreen(
+            ProductFormScreen(
                 productId = productId,
                 navController = navController)
         }
