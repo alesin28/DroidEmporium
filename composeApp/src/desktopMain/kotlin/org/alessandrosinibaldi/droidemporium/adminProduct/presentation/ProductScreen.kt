@@ -48,6 +48,10 @@ fun ProductScreen(
     val onNavigateToAddProduct: () -> Unit = {
         navController.navigate(Route.ProductAdd)
     }
+    val onNavigateToEditProduct: (String) -> Unit = { productId ->
+        navController.navigate(Route.ProductAdd(productId = productId))
+    }
+
     productScreenContent(
         products = products,
         minPrice = minPrice,
@@ -59,6 +63,7 @@ fun ProductScreen(
         query = query,
         deleteProduct = viewModel::deleteProduct,
         onNavigateToAddProduct = onNavigateToAddProduct,
+        onNavigateToEditProduct = onNavigateToEditProduct,
         onSortClick = viewModel::updateSort,
         onMinPriceFilterChange = viewModel::updateMinPriceFilter,
         onMaxPriceFilterChange = viewModel::updateMaxPriceFilter,
@@ -82,6 +87,7 @@ fun productScreenContent(
     query: String,
     deleteProduct: (Product) -> Unit,
     onNavigateToAddProduct: () -> Unit,
+    onNavigateToEditProduct: (String) -> Unit,
     onSortClick: (SortColumn) -> Unit,
     onMinPriceFilterChange: (Double) -> Unit,
     onMaxPriceFilterChange: (Double) -> Unit,
@@ -200,7 +206,8 @@ fun productScreenContent(
                                 items(products) { product ->
                                     ProductItem(
                                         product = product,
-                                        deleteProduct = deleteProduct
+                                        deleteProduct = deleteProduct,
+                                        editProduct = onNavigateToEditProduct,
                                     )
                                     HorizontalDivider(thickness = 1.dp)
                                 }

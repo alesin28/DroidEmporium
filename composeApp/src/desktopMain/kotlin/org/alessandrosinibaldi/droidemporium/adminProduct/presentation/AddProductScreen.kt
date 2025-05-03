@@ -15,12 +15,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @Composable
 fun AddProductScreen(
-    viewModel: AddProductViewModel = koinViewModel(),
-    navController: NavHostController
+    navController: NavHostController,
+    productId: String?
 ) {
+
+    val viewModel: AddProductViewModel = koinViewModel( // Use RENAMED ViewModel
+        parameters = { parametersOf(productId) } // Pass the productId here
+    )
 
     LaunchedEffect(true) {
         viewModel.events.collect { event ->

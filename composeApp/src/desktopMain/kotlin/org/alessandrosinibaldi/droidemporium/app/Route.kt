@@ -8,5 +8,5 @@ interface Route {
     data object ProductList: Route
 
     @Serializable
-    data object ProductAdd: Route
+    data class ProductAdd(val productId: String? = null): Route
 }

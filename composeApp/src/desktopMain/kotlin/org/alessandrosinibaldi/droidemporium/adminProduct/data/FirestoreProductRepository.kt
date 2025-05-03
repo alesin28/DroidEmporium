@@ -37,6 +37,20 @@ class FirestoreProductRepository : ProductRepository {
         //return products
     }
 
+    override suspend fun getProductById(id: String): Product? {
+        val snapshot = firestore.collection("products").document(id).get()
+        return if (snapshot.exists) {
+            snapshot.data<Product>().copy(id = snapshot.id)
+        } else {
+            null
+        }
+    }
+
+    override suspend fun updateProduct(product: Product) {
+        firestore.collection("products").document(product.id.toString()).set(product, merge = false)
+        println("Product updated: ${product.id}")
+    }
+
     override suspend fun deleteProduct(product: Product) {
         println("Deleting product: $product")
         firestore.collection("products").document(product.id.toString()).delete()

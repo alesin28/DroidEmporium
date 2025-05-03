@@ -1,6 +1,7 @@
 package org.alessandrosinibaldi.droidemporium.adminProduct.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,7 +22,8 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ProductItem(
     product: Product,
-    deleteProduct: (Product) -> Unit
+    deleteProduct: (Product) -> Unit,
+    editProduct: (String) -> Unit
 ) {
     val nameWeight = 3f
     val descriptionWeight = 3f
@@ -89,12 +91,22 @@ fun ProductItem(
         VerticalDivider(
             thickness = 1.dp
         )
-        Button(
-            modifier = Modifier.weight(actionsWeight),
-            onClick = { deleteProduct(product) }
-        ) {
-            Text(text = "Delete")
+        Column(modifier = Modifier.weight(actionsWeight)) {
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { deleteProduct(product) }
+            ) {
+                Text(text = "Delete")
+            }
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+
+                onClick = { editProduct(product.id.toString()) }
+            ) {
+                Text(text = "Edit")
+            }
         }
+
 
     }
 }

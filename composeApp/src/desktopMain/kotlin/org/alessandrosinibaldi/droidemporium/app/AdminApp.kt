@@ -21,8 +21,12 @@ fun AdminApp() {
             ProductScreen(navController = navController)
         }
 
-        composable<Route.ProductAdd> {
-            AddProductScreen(navController = navController)
+        composable<Route.ProductAdd> { backStackEntry ->
+            val productId = backStackEntry.arguments?.getString("productId")
+
+            AddProductScreen(
+                productId = productId,
+                navController = navController)
         }
     }
 

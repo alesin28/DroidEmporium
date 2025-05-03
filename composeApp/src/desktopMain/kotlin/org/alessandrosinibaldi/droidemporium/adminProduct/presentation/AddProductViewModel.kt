@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import org.alessandrosinibaldi.droidemporium.adminProduct.domain.Product
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.ProductRepository
 
 sealed interface AddProductEvent {
@@ -15,7 +16,8 @@ sealed interface AddProductEvent {
 }
 
 class AddProductViewModel(
-    private val repository: ProductRepository
+    private val repository: ProductRepository,
+    private val productId: String?
 ) : ViewModel() {
 
     var name by mutableStateOf("")
@@ -24,7 +26,17 @@ class AddProductViewModel(
     var stock by mutableStateOf("")
     var isActive by mutableStateOf(true)
 
+    var isLoading by mutableStateOf(false)
     var isSaving by mutableStateOf(false)
+
+    val isEditMode = productId != null
+
+    init {
+        if (isEditMode && productId != null) {
+            loadProduct(productId)
+        }
+    }
+
 
     private val _eventChannel = Channel<AddProductEvent>()
     val events = _eventChannel.receiveAsFlow()
@@ -51,13 +63,46 @@ class AddProductViewModel(
 
     fun addProduct() {
 
-        if (isSaving) return
+        if (isSaving || isLoading) return
+
+
+
         viewModelScope.launch {
             isSaving = true
-            repository.addProduct(name, description, price.toDouble(), stock.toInt(), isActive)
+
+            if (isEditMode && productId != null) {
+                val updatedProduct = Product(
+                    id = productId,
+                    name = name,
+                    description = description,
+                    price = price.toDouble(),
+                    stock = stock.toInt(),
+                    isActive = isActive
+                )
+                repository.updateProduct(updatedProduct)
+            } else {
+                repository.addProduct(name, description, price.toDouble(), stock.toInt(), isActive)
+
+            }
+
             _eventChannel.send(AddProductEvent.NavigateBack)
         }
 
     }
 
+    private fun loadProduct(id: String) {
+        isLoading = true
+        viewModelScope.launch {
+            val product = repository.getProductById(id)
+            if (product != null) {
+                name = product.name
+                description = product.description
+                price = product.price.toString()
+                stock = product.stock.toString()
+                isActive = product.isActive
+            }
+            isLoading = false
+        }
+
+    }
 }
