@@ -59,6 +59,9 @@ class ProductListViewModel(
     private val _isInactiveFilter = MutableStateFlow<Boolean>(true)
     val isInactiveFilter: StateFlow<Boolean> = _isInactiveFilter.asStateFlow()
 
+    private val _selectedCategoryIds = MutableStateFlow<Set<String>>(emptySet())
+    val selectedCategoryIds = _selectedCategoryIds.asStateFlow()
+
     private val sortStateFlow: Flow<SortState> = combine(
         _sortColumn,
         _sortDirection,
@@ -74,12 +77,14 @@ class ProductListViewModel(
         _maxPriceFilter,
         _minStockFilter,
         _maxStockFilter,
-    ) { minPrice, maxPrice, minStock, maxStock ->
+        _selectedCategoryIds
+    ) { minPrice, maxPrice, minStock, maxStock, selectedCategories ->
         FilterState(
             minPrice = minPrice,
             maxPrice = maxPrice,
             minStock = minStock,
-            maxStock = maxStock
+            maxStock = maxStock,
+            selectedCategories = selectedCategories
         )
     }
 
@@ -133,25 +138,24 @@ class ProductListViewModel(
             SortColumn.NONE -> productsList
         }
 
-        if(activeFilterState.isActive && activeFilterState.isInactive) {
-            sortedList.filter { product ->
-                product.price >= filterState.minPrice && product.price <= filterState.maxPrice
-                        && product.stock >= filterState.minStock && product.stock <= filterState.maxStock
-            }
-        } else if (activeFilterState.isActive) {
-            sortedList.filter { product ->
-                product.price >= filterState.minPrice && product.price <= filterState.maxPrice
-                        && product.stock >= filterState.minStock && product.stock <= filterState.maxStock
-                        && product.isActive
-            }
-        } else {
-            sortedList.filter { product ->
-                product.price >= filterState.minPrice && product.price <= filterState.maxPrice
-                        && product.stock >= filterState.minStock && product.stock <= filterState.maxStock
-                        && !product.isActive
-            }
-        }
+        sortedList.filter { product ->
+            val priceStockMatch =
+                product.price >= filterState.minPrice && product.price <= filterState.maxPrice &&
+                        product.stock >= filterState.minStock && product.stock <= filterState.maxStock
 
+            val statusMatch = if (activeFilterState.isActive == activeFilterState.isInactive) {
+                true
+            } else {
+                product.isActive == activeFilterState.isActive
+            }
+
+            val categoryMatch = if (filterState.selectedCategories.isEmpty()) {
+                true
+            } else {
+                filterState.selectedCategories.contains(product.categoryId)
+            }
+            priceStockMatch && statusMatch && categoryMatch
+        }
     }.stateIn(
         scope = viewModelScope,
         started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
@@ -216,6 +220,16 @@ class ProductListViewModel(
         }
     }
 
+    fun updateSelectedCategories(categoryId: String, isSelected: Boolean) {
+        val currentSelection = _selectedCategoryIds.value
+        val newSelection = if (isSelected) {
+            currentSelection + categoryId
+        } else {
+            currentSelection - categoryId
+        }
+        _selectedCategoryIds.value = newSelection
+    }
+
     data class SortState(
         val sortColumn: SortColumn,
         val sortDirection: SortDirection
@@ -225,7 +239,8 @@ class ProductListViewModel(
         val minPrice: Double,
         val maxPrice: Double,
         val minStock: Int,
-        val maxStock: Int
+        val maxStock: Int,
+        val selectedCategories: Set<String>
     )
 
     data class ActiveFilterState(

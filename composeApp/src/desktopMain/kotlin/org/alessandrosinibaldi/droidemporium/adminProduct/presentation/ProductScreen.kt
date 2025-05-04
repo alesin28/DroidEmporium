@@ -39,6 +39,7 @@ fun ProductScreen(
 ) {
     val products by viewModel.products.collectAsState()
     val categories by viewModel.categories.collectAsState()
+    val selectedCategoryIds by viewModel.selectedCategoryIds.collectAsState()
     val minPrice by viewModel.minPriceFilter.collectAsState()
     val maxPrice by viewModel.maxPriceFilter.collectAsState()
     val minStock by viewModel.minStockFilter.collectAsState()
@@ -57,6 +58,7 @@ fun ProductScreen(
     productScreenContent(
         products = products,
         categories = categories,
+        selectedCategoryIds = selectedCategoryIds,
         minPrice = minPrice,
         maxPrice = maxPrice,
         minStock = minStock,
@@ -74,6 +76,7 @@ fun ProductScreen(
         onMaxStockFilterChange = viewModel::updateMaxStockFilter,
         onActiveFilterChange = viewModel::updateActiveFilter,
         onInactiveFilterChange = viewModel::updateInactiveFilter,
+        onCategorySelectionChange = viewModel::updateSelectedCategories,
         onProductSearch = viewModel::updateQuery
     )
 }
@@ -82,6 +85,7 @@ fun ProductScreen(
 fun productScreenContent(
     products: List<Product>,
     categories: List<Category>,
+    selectedCategoryIds: Set<String>,
     minPrice: Double,
     maxPrice: Double,
     minStock: Int,
@@ -99,8 +103,10 @@ fun productScreenContent(
     onMaxStockFilterChange: (Int) -> Unit,
     onActiveFilterChange: (Boolean) -> Unit,
     onInactiveFilterChange: (Boolean) -> Unit,
+    onCategorySelectionChange: (String, Boolean) -> Unit,
     onProductSearch: (String) -> Unit,
-) {
+
+    ) {
     val nameWeight = 3f
     val categoryWeight = 1f
     val priceWeight = 1f
@@ -335,6 +341,50 @@ fun productScreenContent(
                             )
                         }
 
+                        //LazyColumn {
+                        //    items(categories) {category ->
+                        //        Text(text = category.name)
+
+                        //    }
+                        //}
+                        Text("Category", style = MaterialTheme.typography.titleMedium)
+                        Column(
+                            modifier = Modifier.padding(top = 8.dp)
+                        ) {
+                            categories.forEach { category ->
+                                val categoryId = category.id
+                                if (categoryId != null) {
+                                    val isSelected = selectedCategoryIds.contains(categoryId)
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                onCategorySelectionChange(
+                                                    categoryId,
+                                                    !isSelected
+                                                )
+                                            }
+                                            .padding(vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Checkbox(
+                                            checked = isSelected,
+                                            onCheckedChange = { checked ->
+                                                onCategorySelectionChange(
+                                                    categoryId,
+                                                    checked
+                                                )
+                                            }
+                                        )
+                                        Text(
+                                            text = category.name,
+                                            modifier = Modifier.padding(start = 8.dp),
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    }
+                                }
+                            }
+                        } // End Category Column
 
                     }
                 }
