@@ -7,10 +7,9 @@ import androidx.navigation.compose.rememberNavController
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductFormScreen
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductScreen
 
+
 @Composable
 fun AdminApp() {
-
-
     val navController = rememberNavController()
 
     NavHost(
@@ -21,13 +20,22 @@ fun AdminApp() {
             ProductScreen(navController = navController)
         }
 
-        composable<Route.ProductForm> { backStackEntry ->
+
+        composable<Route.ProductAdd> {
+            ProductFormScreen(
+                productId = null,
+                navController = navController
+            )
+        }
+
+        composable<Route.ProductEdit> { backStackEntry ->
             val productId = backStackEntry.arguments?.getString("productId")
 
             ProductFormScreen(
                 productId = productId,
-                navController = navController)
+                navController = navController
+            )
+
         }
     }
-
 }

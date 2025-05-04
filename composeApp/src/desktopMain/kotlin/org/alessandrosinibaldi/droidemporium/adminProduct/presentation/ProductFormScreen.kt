@@ -6,6 +6,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,8 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
+import org.alessandrosinibaldi.droidemporium.adminCategory.domain.Category
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+
 
 @Composable
 fun ProductFormScreen(
@@ -23,9 +30,13 @@ fun ProductFormScreen(
     productId: String?
 ) {
 
-    val viewModel: ProductFormViewModel = koinViewModel( // Use RENAMED ViewModel
-        parameters = { parametersOf(productId) } // Pass the productId here
+    val viewModel: ProductFormViewModel = koinViewModel(
+        parameters = { parametersOf(productId) }
     )
+
+    val categories by viewModel.categories.collectAsState()
+
+    val selectedCategoryId = viewModel.categoryId
 
     LaunchedEffect(true) {
         viewModel.events.collect { event ->
@@ -44,16 +55,21 @@ fun ProductFormScreen(
         price = viewModel.price,
         stock = viewModel.stock,
         isActive = viewModel.isActive,
+        selectedCategoryId = selectedCategoryId,
+        categories = categories,
         onNameChange = viewModel::onNameChange,
         onDescriptionChange = viewModel::onDescriptionChange,
         onPriceChange = viewModel::onPriceChange,
         onStockChange = viewModel::onStockChange,
         onStatusChange = viewModel::onStatusChange,
+        onCategoryChange = viewModel::onCategoryChange,
         onAddProduct = viewModel::addProduct,
-        isSaving = viewModel.isSaving
+        isSaving = viewModel.isSaving,
+        isLoading = viewModel.isLoading
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductFormScreenContent(
     name: String,
@@ -61,15 +77,24 @@ fun ProductFormScreenContent(
     price: String,
     stock: String,
     isActive: Boolean,
+    selectedCategoryId: String?,
+    categories: List<Category>,
     onNameChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
     onPriceChange: (String) -> Unit,
     onStockChange: (String) -> Unit,
     onStatusChange: (Boolean) -> Unit,
+    onCategoryChange: (String) -> Unit,
     onAddProduct: () -> Unit,
     isSaving: Boolean,
-
+    isLoading: Boolean,
 ) {
+
+    var expanded by remember { mutableStateOf(false) }
+
+    val selectedCategory = remember(selectedCategoryId, categories) {
+        categories.find { it.id == selectedCategoryId }
+    }
 
 
     Box(
@@ -103,6 +128,53 @@ fun ProductFormScreenContent(
                 label = { Text("Stock") },
                 onValueChange = onStockChange,
             )
+
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = {
+                    if (!isSaving && !isLoading) {
+                        expanded = !expanded
+                    }
+                },
+            ) {
+                OutlinedTextField(
+                    value = selectedCategory?.name.toString(),
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Category") },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                    },
+                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                    enabled = !isSaving && !isLoading,
+                    modifier = Modifier
+                        .menuAnchor(
+                            type = MenuAnchorType.PrimaryNotEditable,
+                            enabled = !isSaving && !isLoading
+                        )
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+
+                    categories.forEach { category ->
+                        category.id?.let { categoryId ->
+                            DropdownMenuItem(
+                                text = { Text(category.name) },
+                                onClick = {
+                                    onCategoryChange(categoryId)
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+
+                }
+            }
+
+
+
             Text("Active")
             Checkbox(
                 checked = isActive,

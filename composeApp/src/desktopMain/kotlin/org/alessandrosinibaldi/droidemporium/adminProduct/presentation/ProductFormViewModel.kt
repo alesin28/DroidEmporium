@@ -6,8 +6,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import org.alessandrosinibaldi.droidemporium.adminCategory.domain.Category
 import org.alessandrosinibaldi.droidemporium.adminCategory.domain.CategoryRepository
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.Product
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.ProductRepository
@@ -27,14 +31,18 @@ class ProductFormViewModel(
     var price by mutableStateOf("")
     var stock by mutableStateOf("")
     var isActive by mutableStateOf(true)
-    var categoryId by mutableStateOf("")
+    var categoryId by mutableStateOf<String?>(null)
 
     var isLoading by mutableStateOf(false)
     var isSaving by mutableStateOf(false)
 
     val isEditMode = productId != null
 
+    private val _categories = MutableStateFlow<List<Category>>(emptyList())
+    val categories: StateFlow<List<Category>> = _categories.asStateFlow()
+
     init {
+        loadAvailableCategories()
         if (isEditMode && productId != null) {
             loadProduct(productId)
         }
@@ -64,6 +72,10 @@ class ProductFormViewModel(
         isActive = newStatus
     }
 
+    fun onCategoryChange(selectedCategoryId: String) {
+        categoryId = selectedCategoryId
+    }
+
     fun addProduct() {
 
         if (isSaving || isLoading) return
@@ -81,11 +93,14 @@ class ProductFormViewModel(
                     price = price.toDouble(),
                     stock = stock.toInt(),
                     isActive = isActive,
-                    categoryId = categoryId
+                    categoryId = categoryId.toString()
                 )
                 productRepository.updateProduct(updatedProduct)
             } else {
-                productRepository.addProduct(name, description, price.toDouble(), stock.toInt(), isActive, categoryId)
+                productRepository.addProduct(
+                    name, description, price.toDouble(), stock.toInt(), isActive,
+                    categoryId.toString()
+                )
 
             }
 
@@ -104,9 +119,24 @@ class ProductFormViewModel(
                 price = product.price.toString()
                 stock = product.stock.toString()
                 isActive = product.isActive
+                categoryId = product.categoryId
             }
             isLoading = false
         }
 
     }
+
+    private fun loadAvailableCategories() {
+        viewModelScope.launch {
+            categoryRepository.searchCategories().collect { categoryList ->
+                _categories.value = categoryList
+                if (!isEditMode) {
+                    categoryId = categoryList.first().id.toString()
+                }
+            }
+        }
+
+    }
+
+
 }

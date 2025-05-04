@@ -2,11 +2,15 @@ package org.alessandrosinibaldi.droidemporium.app
 
 import kotlinx.serialization.Serializable
 
-interface Route {
+@Serializable
+sealed class Route {
 
     @Serializable
-    data object ProductList: Route
+    data object ProductList : Route()
 
     @Serializable
-    data class ProductForm(val productId: String? = null): Route
+    data object ProductAdd : Route()
+
+    @Serializable
+    data class ProductEdit(val productId: String) : Route()
 }

@@ -49,10 +49,11 @@ fun ProductScreen(
     val query by viewModel.searchQuery.collectAsState()
 
     val onNavigateToAddProduct: () -> Unit = {
-        navController.navigate(Route.ProductForm)
+        navController.navigate(Route.ProductAdd)
+
     }
     val onNavigateToEditProduct: (String) -> Unit = { productId ->
-        navController.navigate(Route.ProductForm(productId = productId))
+        navController.navigate(Route.ProductEdit(productId = productId))
     }
 
     productScreenContent(
@@ -384,7 +385,7 @@ fun productScreenContent(
                                     }
                                 }
                             }
-                        } // End Category Column
+                        }
 
                     }
                 }
