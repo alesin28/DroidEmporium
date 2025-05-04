@@ -7,5 +7,5 @@ interface ProductRepository {
     suspend fun getProductById(id: String): Product?
     suspend fun updateProduct(product: Product)
     suspend fun deleteProduct(product: Product)
-    suspend fun addProduct(name: String, description: String?, price: Double, stock: Int, isActive: Boolean)
+    suspend fun addProduct(name: String, description: String?, price: Double, stock: Int, isActive: Boolean, categoryId: String)
 }

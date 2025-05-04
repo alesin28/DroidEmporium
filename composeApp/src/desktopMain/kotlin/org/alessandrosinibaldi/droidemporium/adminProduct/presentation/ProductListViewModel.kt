@@ -14,12 +14,16 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.alessandrosinibaldi.droidemporium.adminCategory.domain.Category
+import org.alessandrosinibaldi.droidemporium.adminCategory.domain.CategoryRepository
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.Product
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.ProductRepository
 
 class ProductListViewModel(
-    private val repository: ProductRepository
-) : ViewModel() {
+    private val productRepository: ProductRepository,
+    private val categoryRepository: CategoryRepository,
+
+    ) : ViewModel() {
 
     enum class SortColumn {
         NAME, PRICE, STOCK, NONE
@@ -95,7 +99,7 @@ class ProductListViewModel(
     val products: StateFlow<List<Product>> = combine(
         _searchQuery.debounce(300L)
             .flatMapLatest { productQuery ->
-                repository.searchProducts(productQuery)
+                productRepository.searchProducts(productQuery)
             },
         sortStateFlow,
         filterStateFlow,
@@ -154,6 +158,13 @@ class ProductListViewModel(
         initialValue = emptyList()
     )
 
+    val categories: StateFlow<List<Category>> = categoryRepository.searchCategories()
+        .stateIn(
+            scope = viewModelScope,
+            started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
     fun updateSort(clickedColumn: SortColumn) {
         if (clickedColumn == SortColumn.NONE) return
 
@@ -201,7 +212,7 @@ class ProductListViewModel(
 
     fun deleteProduct(product: Product) {
         viewModelScope.launch {
-            repository.deleteProduct(product)
+            productRepository.deleteProduct(product)
         }
     }
 

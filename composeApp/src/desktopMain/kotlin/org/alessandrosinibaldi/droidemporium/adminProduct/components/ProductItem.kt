@@ -18,15 +18,17 @@ import org.alessandrosinibaldi.droidemporium.adminProduct.domain.Product
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import org.alessandrosinibaldi.droidemporium.adminCategory.domain.Category
 
 @Composable
 fun ProductItem(
     product: Product,
+    category: Category,
     deleteProduct: (Product) -> Unit,
     editProduct: (String) -> Unit
 ) {
     val nameWeight = 3f
-    val descriptionWeight = 3f
+    val categoryWeight = 1f
     val priceWeight = 1f
     val stockWeight = 1f
     val activeWeight = 1f
@@ -54,8 +56,8 @@ fun ProductItem(
         )
         Text(
             modifier = Modifier.padding(horizontal = 8.dp)
-                .weight(descriptionWeight),
-            text = product.description,
+                .weight(categoryWeight),
+            text = category.name,
             maxLines = 2,
         )
         VerticalDivider(

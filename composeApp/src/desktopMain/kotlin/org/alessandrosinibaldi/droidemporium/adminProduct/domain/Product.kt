@@ -10,4 +10,5 @@ data class Product(
     val price: Double,
     val stock: Int,
     val isActive: Boolean,
+    val categoryId: String
 )

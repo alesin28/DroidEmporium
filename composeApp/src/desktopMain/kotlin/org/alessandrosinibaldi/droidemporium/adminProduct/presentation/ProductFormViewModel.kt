@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import org.alessandrosinibaldi.droidemporium.adminCategory.domain.CategoryRepository
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.Product
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.ProductRepository
 
@@ -16,7 +17,8 @@ sealed interface ProductFormEvent {
 }
 
 class ProductFormViewModel(
-    private val repository: ProductRepository,
+    private val productRepository: ProductRepository,
+    private val categoryRepository: CategoryRepository,
     private val productId: String?
 ) : ViewModel() {
 
@@ -25,6 +27,7 @@ class ProductFormViewModel(
     var price by mutableStateOf("")
     var stock by mutableStateOf("")
     var isActive by mutableStateOf(true)
+    var categoryId by mutableStateOf("")
 
     var isLoading by mutableStateOf(false)
     var isSaving by mutableStateOf(false)
@@ -77,11 +80,12 @@ class ProductFormViewModel(
                     description = description,
                     price = price.toDouble(),
                     stock = stock.toInt(),
-                    isActive = isActive
+                    isActive = isActive,
+                    categoryId = categoryId
                 )
-                repository.updateProduct(updatedProduct)
+                productRepository.updateProduct(updatedProduct)
             } else {
-                repository.addProduct(name, description, price.toDouble(), stock.toInt(), isActive)
+                productRepository.addProduct(name, description, price.toDouble(), stock.toInt(), isActive, categoryId)
 
             }
 
@@ -93,7 +97,7 @@ class ProductFormViewModel(
     private fun loadProduct(id: String) {
         isLoading = true
         viewModelScope.launch {
-            val product = repository.getProductById(id)
+            val product = productRepository.getProductById(id)
             if (product != null) {
                 name = product.name
                 description = product.description

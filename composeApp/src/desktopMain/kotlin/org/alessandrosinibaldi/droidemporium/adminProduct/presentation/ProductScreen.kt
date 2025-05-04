@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import org.alessandrosinibaldi.droidemporium.adminCategory.domain.Category
 import org.alessandrosinibaldi.droidemporium.adminProduct.components.ProductItem
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductListViewModel.SortColumn
 import org.koin.compose.viewmodel.koinViewModel
@@ -37,6 +38,7 @@ fun ProductScreen(
     navController: NavHostController
 ) {
     val products by viewModel.products.collectAsState()
+    val categories by viewModel.categories.collectAsState()
     val minPrice by viewModel.minPriceFilter.collectAsState()
     val maxPrice by viewModel.maxPriceFilter.collectAsState()
     val minStock by viewModel.minStockFilter.collectAsState()
@@ -54,6 +56,7 @@ fun ProductScreen(
 
     productScreenContent(
         products = products,
+        categories = categories,
         minPrice = minPrice,
         maxPrice = maxPrice,
         minStock = minStock,
@@ -78,6 +81,7 @@ fun ProductScreen(
 @Composable
 fun productScreenContent(
     products: List<Product>,
+    categories: List<Category>,
     minPrice: Double,
     maxPrice: Double,
     minStock: Int,
@@ -98,7 +102,7 @@ fun productScreenContent(
     onProductSearch: (String) -> Unit,
 ) {
     val nameWeight = 3f
-    val descriptionWeight = 3f
+    val categoryWeight = 1f
     val priceWeight = 1f
     val actionsWeight = 1f
     val stockWeight = 1f
@@ -154,8 +158,8 @@ fun productScreenContent(
                                 color = MaterialTheme.colorScheme.secondary
                             )
                             TableHeader(
-                                text = "Description",
-                                weight = descriptionWeight,
+                                text = "Category",
+                                weight = categoryWeight,
                                 isSortable = false
                             )
                             VerticalDivider(
@@ -204,11 +208,15 @@ fun productScreenContent(
                                 modifier = Modifier.background(color = MaterialTheme.colorScheme.surfaceVariant)
                             ) {
                                 items(products) { product ->
-                                    ProductItem(
-                                        product = product,
-                                        deleteProduct = deleteProduct,
-                                        editProduct = onNavigateToEditProduct,
-                                    )
+                                    categories.find { category -> category.id == product.categoryId }
+                                        ?.let {
+                                            ProductItem(
+                                                product = product,
+                                                category = it,
+                                                deleteProduct = deleteProduct,
+                                                editProduct = onNavigateToEditProduct,
+                                            )
+                                        }
                                     HorizontalDivider(thickness = 1.dp)
                                 }
                             }

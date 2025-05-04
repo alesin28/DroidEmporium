@@ -19,7 +19,8 @@ class FirestoreProductRepository : ProductRepository {
                     description = documentSnapshot.data<Product>().description,
                     price = documentSnapshot.data<Product>().price.toDouble(),
                     stock = documentSnapshot.data<Product>().stock.toInt(),
-                    isActive = documentSnapshot.data<Product>().isActive
+                    isActive = documentSnapshot.data<Product>().isActive,
+                    categoryId = documentSnapshot.data<Product>().categoryId
                 )
             }
 
@@ -61,7 +62,8 @@ class FirestoreProductRepository : ProductRepository {
         description: String?,
         price: Double,
         stock: Int,
-        isActive: Boolean
+        isActive: Boolean,
+        categoryId: String
     ) {
         println("Adding product: $name, $description, $price")
         val ref = firestore.collection("products")
@@ -69,7 +71,8 @@ class FirestoreProductRepository : ProductRepository {
                 Product(
                     name = name, description = description.toString(), price = price,
                     stock = stock,
-                    isActive = isActive
+                    isActive = isActive,
+                    categoryId = categoryId
                 )
             )
         println("Product added with ID: ${ref.id}")
