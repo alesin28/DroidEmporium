@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import org.alessandrosinibaldi.droidemporium.adminCategory.presentation.CategoryListScreen
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductDetailScreen
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductFormScreen
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductScreen
@@ -15,8 +16,13 @@ fun AdminApp() {
 
     NavHost(
         navController = navController,
-        startDestination = Route.ProductList
+        startDestination = Route.StartMenu
     ) {
+
+        composable<Route.StartMenu> {
+            StartMenu(navController = navController)
+        }
+
         composable<Route.ProductList> {
             ProductScreen(navController = navController)
         }
@@ -42,6 +48,10 @@ fun AdminApp() {
                 navController = navController
             )
 
+        }
+
+        composable<Route.CategoryList> {
+            CategoryListScreen()
         }
     }
 }

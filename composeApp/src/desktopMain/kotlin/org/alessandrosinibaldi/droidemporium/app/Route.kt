@@ -16,4 +16,11 @@ sealed class Route {
 
     @Serializable
     data class ProductEdit(val productId: String) : Route()
+
+    @Serializable
+    data object CategoryList : Route()
+
+    @Serializable
+    data object StartMenu : Route()
+
 }

@@ -19,18 +19,28 @@ class FirestoreCategoryRepository : CategoryRepository {
                     name = documentSnapshot.data<Category>().name
                 )
 
+
             }
-            emit(categories)
-        }
-
-    }
-
-    override suspend fun getCategoryById(id: String): Category? {
-        val snapshot = firestore.collection("categories").document(id).get()
-        return if (snapshot.exists) {
-            snapshot.data<Category>().copy(id = snapshot.id)
-        } else {
-            null
+            val filteredCategories = if (!query.isNullOrBlank()) {
+                val lowerCaseQuery = query.lowercase()
+                categories.filter { category ->
+                    category.name.lowercase().contains(lowerCaseQuery.toString())
+                }
+            } else {
+                categories
+            }
+            emit(filteredCategories)
         }
     }
+
+
+
+override suspend fun getCategoryById(id: String): Category? {
+    val snapshot = firestore.collection("categories").document(id).get()
+    return if (snapshot.exists) {
+        snapshot.data<Category>().copy(id = snapshot.id)
+    } else {
+        null
+    }
+}
 }

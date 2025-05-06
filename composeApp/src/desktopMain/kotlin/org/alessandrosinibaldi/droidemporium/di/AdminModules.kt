@@ -2,6 +2,7 @@ package org.alessandrosinibaldi.droidemporium.di
 
 import org.alessandrosinibaldi.droidemporium.adminCategory.data.FirestoreCategoryRepository
 import org.alessandrosinibaldi.droidemporium.adminCategory.domain.CategoryRepository
+import org.alessandrosinibaldi.droidemporium.adminCategory.presentation.CategoryListViewModel
 import org.alessandrosinibaldi.droidemporium.adminProduct.data.FirestoreProductRepository
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.ProductRepository
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductDetailViewModel
@@ -36,10 +37,19 @@ val appModule = module {
         )
     }
 
-    viewModel { params -> //
+    viewModel { params ->
         ProductFormViewModel(
             productRepository = get(),
             categoryRepository = get(),
             productId = params.getOrNull()
         )
-    }}
+    }
+
+    viewModel { params ->
+        CategoryListViewModel(
+            productRepository = get(),
+            categoryRepository = get()
+        )
+    }
+}
+
