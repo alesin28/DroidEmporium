@@ -23,4 +23,7 @@ sealed class Route {
     @Serializable
     data object StartMenu : Route()
 
+    @Serializable
+    data object ClientList : Route()
+
 }

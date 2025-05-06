@@ -66,5 +66,25 @@ fun StartMenu(
                 style = MaterialTheme.typography.titleMedium
             )
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(0.6f)
+                .clickable {
+                    navController.navigate(Route.ClientList)
+                },
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            Text(
+                text = "Clients",
+                modifier = Modifier
+                    .padding(16.dp)
+                    .align(Alignment.CenterHorizontally),
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
+
     }
 }
