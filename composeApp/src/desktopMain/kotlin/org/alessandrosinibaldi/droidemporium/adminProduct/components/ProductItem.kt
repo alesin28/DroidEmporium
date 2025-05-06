@@ -1,6 +1,7 @@
 package org.alessandrosinibaldi.droidemporium.adminProduct.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -25,7 +26,8 @@ fun ProductItem(
     product: Product,
     category: Category,
     deleteProduct: (Product) -> Unit,
-    editProduct: (String) -> Unit
+    editProduct: (String) -> Unit,
+    onNavigateToProductDetail: (String) -> Unit
 ) {
     val nameWeight = 3f
     val categoryWeight = 1f
@@ -45,7 +47,8 @@ fun ProductItem(
     ) {
         Text(
             modifier = Modifier.padding(horizontal = 8.dp)
-                .weight(nameWeight),
+                .weight(nameWeight)
+                .clickable { onNavigateToProductDetail(product.id.toString()) },
             text = product.name,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,

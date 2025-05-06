@@ -4,6 +4,7 @@ import org.alessandrosinibaldi.droidemporium.adminCategory.data.FirestoreCategor
 import org.alessandrosinibaldi.droidemporium.adminCategory.domain.CategoryRepository
 import org.alessandrosinibaldi.droidemporium.adminProduct.data.FirestoreProductRepository
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.ProductRepository
+import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductDetailViewModel
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductFormViewModel
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductListViewModel
 import org.koin.core.module.dsl.singleOf
@@ -24,6 +25,14 @@ val appModule = module {
         ProductListViewModel(
             productRepository = get(),
             categoryRepository = get(),
+        )
+    }
+
+    viewModel { params ->
+        ProductDetailViewModel(
+            productRepository = get(),
+            categoryRepository = get(),
+            productId = params.getOrNull()
         )
     }
 

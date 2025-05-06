@@ -24,4 +24,13 @@ class FirestoreCategoryRepository : CategoryRepository {
         }
 
     }
+
+    override suspend fun getCategoryById(id: String): Category? {
+        val snapshot = firestore.collection("categories").document(id).get()
+        return if (snapshot.exists) {
+            snapshot.data<Category>().copy(id = snapshot.id)
+        } else {
+            null
+        }
+    }
 }

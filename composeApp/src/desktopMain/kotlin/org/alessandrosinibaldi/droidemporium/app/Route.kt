@@ -12,5 +12,8 @@ sealed class Route {
     data object ProductAdd : Route()
 
     @Serializable
+    data class ProductDetail(val productId: String) : Route()
+
+    @Serializable
     data class ProductEdit(val productId: String) : Route()
 }
