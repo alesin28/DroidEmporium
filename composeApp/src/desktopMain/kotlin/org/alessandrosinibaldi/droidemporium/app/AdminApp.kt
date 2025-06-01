@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import org.alessandrosinibaldi.droidemporium.adminCategory.presentation.CategoryListScreen
 import org.alessandrosinibaldi.droidemporium.adminClient.presentation.ClientListScreen
+import org.alessandrosinibaldi.droidemporium.adminOrder.presentation.orderListScreen
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductDetailScreen
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductFormScreen
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductScreen
@@ -57,6 +58,10 @@ fun AdminApp() {
 
         composable<Route.ClientList> {
             ClientListScreen(navController = navController)
+        }
+
+        composable<Route.OrderList> {
+            orderListScreen()
         }
 
     }

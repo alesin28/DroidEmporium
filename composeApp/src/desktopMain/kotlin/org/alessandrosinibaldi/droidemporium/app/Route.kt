@@ -26,4 +26,7 @@ sealed class Route {
     @Serializable
     data object ClientList : Route()
 
+    @Serializable
+    data object OrderList : Route()
+
 }

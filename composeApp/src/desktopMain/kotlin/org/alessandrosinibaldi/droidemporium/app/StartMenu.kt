@@ -86,5 +86,22 @@ fun StartMenu(
             )
         }
 
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(0.6f)
+                .clickable {
+                    navController.navigate(Route.OrderList)
+                },
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            Text(
+                text = "Orders",
+                modifier = Modifier
+                    .padding(16.dp)
+                    .align(Alignment.CenterHorizontally),
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
+
     }
 }

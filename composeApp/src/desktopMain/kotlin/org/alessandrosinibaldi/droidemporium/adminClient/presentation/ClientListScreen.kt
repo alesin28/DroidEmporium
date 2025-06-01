@@ -152,7 +152,7 @@ fun clientScreenContent(
                                 items(clients) { client ->
 
                                     ClientItem(
-                                        client = client,
+                                        client = client
                                     )
                                     HorizontalDivider(thickness = 1.dp)
                                 }

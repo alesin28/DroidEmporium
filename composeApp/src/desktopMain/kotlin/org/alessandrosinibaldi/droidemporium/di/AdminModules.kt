@@ -6,11 +6,14 @@ import org.alessandrosinibaldi.droidemporium.adminCategory.presentation.Category
 import org.alessandrosinibaldi.droidemporium.adminClient.data.FirestoreClientRepository
 import org.alessandrosinibaldi.droidemporium.adminClient.domain.ClientRepository
 import org.alessandrosinibaldi.droidemporium.adminClient.presentation.ClientListViewModel
+import org.alessandrosinibaldi.droidemporium.adminOrder.data.FirestoreOrderRepository
+import org.alessandrosinibaldi.droidemporium.adminOrder.domain.OrderRepository
 import org.alessandrosinibaldi.droidemporium.adminProduct.data.FirestoreProductRepository
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.ProductRepository
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductDetailViewModel
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductFormViewModel
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductListViewModel
+import org.alessandrosinibaldi.droidemporium.adminOrder.presentation.OrderListViewModel
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
@@ -24,8 +27,11 @@ val appModule = module {
     singleOf(::FirestoreProductRepository).bind<ProductRepository>()
     singleOf(::FirestoreCategoryRepository).bind<CategoryRepository>()
     singleOf(::FirestoreClientRepository).bind<ClientRepository>()
+    singleOf(::FirestoreOrderRepository).bind<OrderRepository>()
 
     viewModelOf(::ClientListViewModel)
+
+    viewModelOf(::OrderListViewModel)
 
     viewModel { params ->
         ProductListViewModel(

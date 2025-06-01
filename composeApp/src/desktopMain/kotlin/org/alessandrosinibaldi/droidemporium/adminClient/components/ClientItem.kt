@@ -21,8 +21,7 @@ import org.alessandrosinibaldi.droidemporium.adminClient.domain.Client
 @Composable
 fun ClientItem(
     client: Client,
-
-) {
+    ) {
     val nameWeight = 1f
     val emailWeight = 2f
     val phoneWeight = 2f
