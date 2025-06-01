@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.stateIn
 import org.alessandrosinibaldi.droidemporium.adminClient.domain.Client
 import org.alessandrosinibaldi.droidemporium.adminOrder.domain.Order
 import org.alessandrosinibaldi.droidemporium.adminOrder.domain.OrderRepository
-import org.alessandrosinibaldi.droidemporium.adminProduct.domain.Product
 
 class OrderListViewModel(
     private val orderRepository: OrderRepository
