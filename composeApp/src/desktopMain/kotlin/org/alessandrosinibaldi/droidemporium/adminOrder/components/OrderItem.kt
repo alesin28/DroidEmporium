@@ -1,5 +1,6 @@
 package org.alessandrosinibaldi.droidemporium.adminOrder.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,12 +15,14 @@ import org.alessandrosinibaldi.droidemporium.adminOrder.domain.Order
 @Composable
 fun OrderItem(
     order: Order,
-    client: Client?
+    client: Client?,
+    onNavigateToOrderDetail: (String) -> Unit = {}
 ) {
     Card(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
+            .clickable { onNavigateToOrderDetail(order.id.toString()) }
     ) {
         Column(
             modifier = Modifier.padding(8.dp)

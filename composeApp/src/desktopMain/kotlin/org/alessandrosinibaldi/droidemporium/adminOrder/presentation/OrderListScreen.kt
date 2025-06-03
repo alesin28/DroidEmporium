@@ -16,28 +16,37 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import org.alessandrosinibaldi.droidemporium.adminOrder.domain.Order
 import org.koin.compose.viewmodel.koinViewModel
 import org.alessandrosinibaldi.droidemporium.adminClient.domain.Client
 import org.alessandrosinibaldi.droidemporium.adminOrder.components.OrderItem
+import org.alessandrosinibaldi.droidemporium.app.Route
 
 
 @Composable
 fun orderListScreen(
-    viewModel: OrderListViewModel = koinViewModel()
+    viewModel: OrderListViewModel = koinViewModel(),
+    navController: NavHostController
 ) {
 
     val orders by viewModel.orders.collectAsState()
 
+    val onNavigateToOrderDetail: (String) -> Unit = { orderId ->
+        navController.navigate(Route.OrderDetail(orderId = orderId))
+    }
+
     orderListScreenContent(
-        orders = orders
+        orders = orders,
+        onNavigateToOrderDetail = onNavigateToOrderDetail
     )
 
 }
 
 @Composable
 fun orderListScreenContent(
-    orders: Pair<List<Order>, List<Client>>
+    orders: Pair<List<Order>, List<Client>>,
+    onNavigateToOrderDetail: (String) -> Unit = {}
 ) {
 
     val orderList = orders.first
@@ -62,7 +71,11 @@ fun orderListScreenContent(
                     ) {
                         LazyColumn {
                             items(orderList) { order ->
-                                OrderItem(order = order, client = clientList.find { it.id == order.clientId })
+                                OrderItem(
+                                    order = order,
+                                    client = clientList.find { it.id == order.clientId },
+                                    onNavigateToOrderDetail = onNavigateToOrderDetail
+                                )
                             }
                         }
                     }

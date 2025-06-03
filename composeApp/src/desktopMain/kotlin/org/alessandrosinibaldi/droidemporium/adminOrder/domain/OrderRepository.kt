@@ -7,6 +7,8 @@ interface OrderRepository {
 
     fun searchOrders(query: String? = null): Flow<Pair<List<Order>, List<Client>>>
 
+    suspend fun getOrderById(id: String): Pair<Order, Client>?
+
 
 
 }

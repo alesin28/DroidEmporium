@@ -29,4 +29,7 @@ sealed class Route {
     @Serializable
     data object OrderList : Route()
 
+    @Serializable
+    data class OrderDetail(val orderId: String) : Route()
+
 }

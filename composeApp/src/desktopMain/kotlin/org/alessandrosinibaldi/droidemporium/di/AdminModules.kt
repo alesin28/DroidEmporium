@@ -8,6 +8,7 @@ import org.alessandrosinibaldi.droidemporium.adminClient.domain.ClientRepository
 import org.alessandrosinibaldi.droidemporium.adminClient.presentation.ClientListViewModel
 import org.alessandrosinibaldi.droidemporium.adminOrder.data.FirestoreOrderRepository
 import org.alessandrosinibaldi.droidemporium.adminOrder.domain.OrderRepository
+import org.alessandrosinibaldi.droidemporium.adminOrder.presentation.OrderDetailViewModel
 import org.alessandrosinibaldi.droidemporium.adminProduct.data.FirestoreProductRepository
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.ProductRepository
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductDetailViewModel
@@ -62,5 +63,13 @@ val appModule = module {
             categoryRepository = get()
         )
     }
+
+    viewModel { params ->
+        OrderDetailViewModel(
+            orderRepository = get(),
+            orderId = params.getOrNull()
+        )
+    }
+
 }
 

@@ -65,6 +65,34 @@ class FirestoreOrderRepository : OrderRepository {
 
     }
 
+    override suspend fun getOrderById(id: String): Pair<Order, Client>? {
+
+        val orderDocSnapshot = ordersCollection.document(id).get()
+        if (orderDocSnapshot.exists) {
+            val orderData = orderDocSnapshot.data<Order>()
+
+            val lines = getOrderLines(orderDocSnapshot.id)
+
+            val order = Order(
+                id = orderDocSnapshot.id,
+                clientId = orderData.clientId,
+                orderDate = orderData.orderDate,
+                totalAmount = orderData.totalAmount,
+                lines = lines
+            )
+
+
+            val clientDocSnapshot = clientsCollection.document(order.clientId).get()
+
+            if (clientDocSnapshot.exists) {
+                val client = clientDocSnapshot.data<Client>()
+                    .copy(id = clientDocSnapshot.id)
+                return Pair(order, client)
+            }
+        }
+        return null
+    }
+
 
     private suspend fun getOrderLines(orderId: String): List<OrderLine> {
         val linesSnapshot = ordersCollection.document(orderId)

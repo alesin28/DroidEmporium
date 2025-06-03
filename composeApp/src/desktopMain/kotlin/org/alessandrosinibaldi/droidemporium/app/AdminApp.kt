@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import org.alessandrosinibaldi.droidemporium.adminCategory.presentation.CategoryListScreen
 import org.alessandrosinibaldi.droidemporium.adminClient.presentation.ClientListScreen
+import org.alessandrosinibaldi.droidemporium.adminOrder.presentation.OrderDetailScreen
 import org.alessandrosinibaldi.droidemporium.adminOrder.presentation.orderListScreen
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductDetailScreen
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductFormScreen
@@ -61,7 +62,12 @@ fun AdminApp() {
         }
 
         composable<Route.OrderList> {
-            orderListScreen()
+            orderListScreen(navController = navController)
+        }
+
+        composable<Route.OrderDetail> { backStackEntry ->
+            val orderId = backStackEntry.arguments?.getString("orderId")
+            OrderDetailScreen(orderId = orderId)
         }
 
     }
