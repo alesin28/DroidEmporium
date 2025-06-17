@@ -44,6 +44,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.kotlin.test)
             implementation(libs.gitlive.firebase.firestore)
+            implementation(libs.gitlive.firebase.auth)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.serialization.json)

@@ -7,7 +7,7 @@ import org.alessandrosinibaldi.droidemporium.adminClient.domain.AdminClientRepos
 import org.alessandrosinibaldi.droidemporium.adminClient.presentation.ClientListViewModel
 import org.alessandrosinibaldi.droidemporium.adminOrder.data.FirestoreOrderRepository
 import org.alessandrosinibaldi.droidemporium.adminOrder.presentation.OrderDetailViewModel
-import org.alessandrosinibaldi.droidemporium.adminProduct.data.FirestoreProductRepository
+import org.alessandrosinibaldi.droidemporium.adminProduct.data.AdminFirestoreProductRepository
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductDetailViewModel
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductFormViewModel
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductListViewModel
@@ -22,10 +22,10 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 
-val appModule = module {
+val desktopAppModule = module {
 
 
-    singleOf(::FirestoreProductRepository).bind<AdminProductRepository>()
+    singleOf(::AdminFirestoreProductRepository).bind<AdminProductRepository>()
     singleOf(::FirestoreCategoryRepository).bind<CategoryRepository>()
     singleOf(::FirestoreClientRepository).bind<AdminClientRepository>()
     singleOf(::FirestoreOrderRepository).bind<OrderRepository>()

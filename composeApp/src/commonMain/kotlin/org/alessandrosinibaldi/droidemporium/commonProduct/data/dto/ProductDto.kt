@@ -1,4 +1,4 @@
-package org.alessandrosinibaldi.droidemporium.adminProduct.data.dto
+package org.alessandrosinibaldi.droidemporium.commonProduct.data.dto
 
 import kotlinx.serialization.Serializable
 import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product

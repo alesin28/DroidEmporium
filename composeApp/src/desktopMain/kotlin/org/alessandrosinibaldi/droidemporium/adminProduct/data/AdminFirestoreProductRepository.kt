@@ -4,14 +4,14 @@ import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.firestore.firestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import org.alessandrosinibaldi.droidemporium.adminProduct.data.dto.ProductDto
-import org.alessandrosinibaldi.droidemporium.adminProduct.data.dto.toDomain
+import org.alessandrosinibaldi.droidemporium.commonProduct.data.dto.ProductDto
+import org.alessandrosinibaldi.droidemporium.commonProduct.data.dto.toDomain
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.AdminProductRepository
 import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
 
 
-class FirestoreProductRepository : AdminProductRepository  {
+class AdminFirestoreProductRepository : AdminProductRepository  {
     private val firestore = Firebase.firestore
     private val productsCollection = firestore.collection("products")
 
