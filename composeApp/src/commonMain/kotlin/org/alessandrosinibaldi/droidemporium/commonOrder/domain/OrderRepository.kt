@@ -1,4 +1,4 @@
-package org.alessandrosinibaldi.droidemporium.adminOrder.domain
+package org.alessandrosinibaldi.droidemporium.commonOrder.domain
 
 import kotlinx.coroutines.flow.Flow
 import org.alessandrosinibaldi.droidemporium.core.domain.Result

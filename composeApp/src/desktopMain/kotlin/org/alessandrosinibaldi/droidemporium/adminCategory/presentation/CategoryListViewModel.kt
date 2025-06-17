@@ -11,18 +11,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
-import org.alessandrosinibaldi.droidemporium.adminCategory.domain.Category
-import org.alessandrosinibaldi.droidemporium.adminCategory.domain.CategoryRepository
-import org.alessandrosinibaldi.droidemporium.adminProduct.domain.Product
-import org.alessandrosinibaldi.droidemporium.adminProduct.domain.ProductRepository
+import org.alessandrosinibaldi.droidemporium.commonCategory.domain.Category
+import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
 import kotlinx.coroutines.flow.map
-
+import org.alessandrosinibaldi.droidemporium.adminProduct.domain.AdminProductRepository
+import org.alessandrosinibaldi.droidemporium.commonCategory.domain.CategoryRepository
 
 
 class CategoryListViewModel(
     private val categoryRepository: CategoryRepository,
-    private val productRepository: ProductRepository
+    private val adminProductRepository: AdminProductRepository
 
 ) : ViewModel() {
 
@@ -30,7 +29,7 @@ class CategoryListViewModel(
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     //private val _products = MutableStateFlow<List<Product>>(emptyList())
-    val products: StateFlow<List<Product>> = productRepository
+    val products: StateFlow<List<Product>> = adminProductRepository
         .searchProducts("")
         .map { result ->
             when (result) {

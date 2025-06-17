@@ -6,12 +6,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.alessandrosinibaldi.droidemporium.adminProduct.data.dto.ProductDto
 import org.alessandrosinibaldi.droidemporium.adminProduct.data.dto.toDomain
-import org.alessandrosinibaldi.droidemporium.adminProduct.domain.Product
-import org.alessandrosinibaldi.droidemporium.adminProduct.domain.ProductRepository
+import org.alessandrosinibaldi.droidemporium.adminProduct.domain.AdminProductRepository
+import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
 
 
-class FirestoreProductRepository : ProductRepository {
+class FirestoreProductRepository : AdminProductRepository  {
     private val firestore = Firebase.firestore
     private val productsCollection = firestore.collection("products")
 

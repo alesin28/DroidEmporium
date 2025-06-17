@@ -1,20 +1,20 @@
 package org.alessandrosinibaldi.droidemporium.di
 
 import org.alessandrosinibaldi.droidemporium.adminCategory.data.FirestoreCategoryRepository
-import org.alessandrosinibaldi.droidemporium.adminCategory.domain.CategoryRepository
 import org.alessandrosinibaldi.droidemporium.adminCategory.presentation.CategoryListViewModel
 import org.alessandrosinibaldi.droidemporium.adminClient.data.FirestoreClientRepository
-import org.alessandrosinibaldi.droidemporium.adminClient.domain.ClientRepository
+import org.alessandrosinibaldi.droidemporium.adminClient.domain.AdminClientRepository
 import org.alessandrosinibaldi.droidemporium.adminClient.presentation.ClientListViewModel
 import org.alessandrosinibaldi.droidemporium.adminOrder.data.FirestoreOrderRepository
-import org.alessandrosinibaldi.droidemporium.adminOrder.domain.OrderRepository
 import org.alessandrosinibaldi.droidemporium.adminOrder.presentation.OrderDetailViewModel
 import org.alessandrosinibaldi.droidemporium.adminProduct.data.FirestoreProductRepository
-import org.alessandrosinibaldi.droidemporium.adminProduct.domain.ProductRepository
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductDetailViewModel
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductFormViewModel
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductListViewModel
 import org.alessandrosinibaldi.droidemporium.adminOrder.presentation.OrderListViewModel
+import org.alessandrosinibaldi.droidemporium.adminProduct.domain.AdminProductRepository
+import org.alessandrosinibaldi.droidemporium.commonCategory.domain.CategoryRepository
+import org.alessandrosinibaldi.droidemporium.commonOrder.domain.OrderRepository
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
@@ -25,9 +25,9 @@ import org.koin.dsl.module
 val appModule = module {
 
 
-    singleOf(::FirestoreProductRepository).bind<ProductRepository>()
+    singleOf(::FirestoreProductRepository).bind<AdminProductRepository>()
     singleOf(::FirestoreCategoryRepository).bind<CategoryRepository>()
-    singleOf(::FirestoreClientRepository).bind<ClientRepository>()
+    singleOf(::FirestoreClientRepository).bind<AdminClientRepository>()
     singleOf(::FirestoreOrderRepository).bind<OrderRepository>()
 
     viewModelOf(::ClientListViewModel)
@@ -36,14 +36,14 @@ val appModule = module {
 
     viewModel { params ->
         ProductListViewModel(
-            productRepository = get(),
+            adminProductRepository = get(),
             categoryRepository = get(),
         )
     }
 
     viewModel { params ->
         ProductDetailViewModel(
-            productRepository = get(),
+            adminProductRepository = get(),
             categoryRepository = get(),
             productId = params.getOrNull()
         )
@@ -51,7 +51,7 @@ val appModule = module {
 
     viewModel { params ->
         ProductFormViewModel(
-            productRepository = get(),
+            adminProductRepository = get(),
             categoryRepository = get(),
             productId = params.getOrNull()
         )
@@ -59,7 +59,7 @@ val appModule = module {
 
     viewModel { params ->
         CategoryListViewModel(
-            productRepository = get(),
+            adminProductRepository = get(),
             categoryRepository = get()
         )
     }
@@ -67,7 +67,7 @@ val appModule = module {
     viewModel { params ->
         OrderDetailViewModel(
             orderRepository = get(),
-            clientRepository = get(),
+            adminClientRepository = get(),
             orderId = params.getOrNull()
         )
     }

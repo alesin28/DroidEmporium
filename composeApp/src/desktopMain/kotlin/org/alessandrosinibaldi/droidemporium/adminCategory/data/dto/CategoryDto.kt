@@ -1,7 +1,7 @@
 package org.alessandrosinibaldi.droidemporium.adminCategory.data.dto
 
 import kotlinx.serialization.Serializable
-import org.alessandrosinibaldi.droidemporium.adminCategory.domain.Category
+import org.alessandrosinibaldi.droidemporium.commonCategory.domain.Category
 
 @Serializable
 data class CategoryDto(

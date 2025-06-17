@@ -6,15 +6,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.alessandrosinibaldi.droidemporium.adminClient.data.dto.ClientDto
 import org.alessandrosinibaldi.droidemporium.adminClient.data.dto.toDomain
-import org.alessandrosinibaldi.droidemporium.adminClient.domain.Client
-import org.alessandrosinibaldi.droidemporium.adminClient.domain.ClientRepository
+import org.alessandrosinibaldi.droidemporium.commonClient.domain.Client
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import org.alessandrosinibaldi.droidemporium.adminClient.domain.AdminClientRepository
 
 
-class FirestoreClientRepository : ClientRepository {
+class FirestoreClientRepository : AdminClientRepository {
 
     private val firestore = Firebase.firestore
     private val clientsCollection = firestore.collection("clients")

@@ -1,4 +1,4 @@
-package org.alessandrosinibaldi.droidemporium.adminProduct.domain
+package org.alessandrosinibaldi.droidemporium.commonProduct.domain
 
 data class Product(
     val id: String,

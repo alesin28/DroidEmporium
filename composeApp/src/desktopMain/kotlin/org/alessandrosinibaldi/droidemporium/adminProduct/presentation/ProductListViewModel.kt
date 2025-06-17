@@ -14,15 +14,15 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.alessandrosinibaldi.droidemporium.adminCategory.domain.Category
-import org.alessandrosinibaldi.droidemporium.adminCategory.domain.CategoryRepository
-import org.alessandrosinibaldi.droidemporium.adminProduct.domain.Product
-import org.alessandrosinibaldi.droidemporium.adminProduct.domain.ProductRepository
+import org.alessandrosinibaldi.droidemporium.commonCategory.domain.Category
+import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
 import kotlinx.coroutines.flow.map
+import org.alessandrosinibaldi.droidemporium.adminProduct.domain.AdminProductRepository
+import org.alessandrosinibaldi.droidemporium.commonCategory.domain.CategoryRepository
 
 class ProductListViewModel(
-    private val productRepository: ProductRepository,
+    private val adminProductRepository: AdminProductRepository,
     private val categoryRepository: CategoryRepository,
 
     ) : ViewModel() {
@@ -107,7 +107,7 @@ class ProductListViewModel(
         val productsSourceFlow: Flow<Result<List<Product>>> = _searchQuery
             .debounce(300L)
             .flatMapLatest { productQuery ->
-                productRepository.searchProducts(productQuery)
+                adminProductRepository.searchProducts(productQuery)
             }
         val unwrappedProductsFlow: Flow<List<Product>> = productsSourceFlow
             .map { result ->
@@ -247,7 +247,7 @@ class ProductListViewModel(
 
     fun deleteProduct(product: Product) {
         viewModelScope.launch {
-            val result = productRepository.deleteProduct(product.id)
+            val result = adminProductRepository.deleteProduct(product.id)
             when (result) {
                 is Result.Success -> {
                     println("Successfully deleted product ${product.id}")

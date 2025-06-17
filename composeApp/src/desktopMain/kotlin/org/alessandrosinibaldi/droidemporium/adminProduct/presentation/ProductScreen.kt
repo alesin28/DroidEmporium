@@ -25,12 +25,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import org.alessandrosinibaldi.droidemporium.adminCategory.domain.Category
+import org.alessandrosinibaldi.droidemporium.commonCategory.domain.Category
 import org.alessandrosinibaldi.droidemporium.adminProduct.components.ProductItem
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductListViewModel.SortColumn
 import org.koin.compose.viewmodel.koinViewModel
-import org.alessandrosinibaldi.droidemporium.adminProduct.domain.*
 import org.alessandrosinibaldi.droidemporium.app.Route
+import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
 
 @Composable
 fun ProductScreen(

@@ -5,15 +5,15 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.alessandrosinibaldi.droidemporium.adminClient.domain.Client
-import org.alessandrosinibaldi.droidemporium.adminClient.domain.ClientRepository // <-- CHANGED: Added ClientRepository
-import org.alessandrosinibaldi.droidemporium.adminOrder.domain.Order
-import org.alessandrosinibaldi.droidemporium.adminOrder.domain.OrderRepository
-import org.alessandrosinibaldi.droidemporium.core.domain.Result // <-- CHANGED: Added Result import
+import org.alessandrosinibaldi.droidemporium.adminClient.domain.AdminClientRepository
+import org.alessandrosinibaldi.droidemporium.commonClient.domain.Client
+import org.alessandrosinibaldi.droidemporium.commonOrder.domain.Order
+import org.alessandrosinibaldi.droidemporium.commonOrder.domain.OrderRepository
+import org.alessandrosinibaldi.droidemporium.core.domain.Result
 
 class OrderDetailViewModel(
     private val orderRepository: OrderRepository,
-    private val clientRepository: ClientRepository,
+    private val adminClientRepository: AdminClientRepository,
     private val orderId: String?
 ) : ViewModel() {
     private val _order = MutableStateFlow<Order?>(null)
@@ -43,7 +43,7 @@ class OrderDetailViewModel(
             _order.value = fetchedOrder
 
             if (fetchedOrder != null) {
-                val clientResult = clientRepository.getClientById(fetchedOrder.clientId)
+                val clientResult = adminClientRepository.getClientById(fetchedOrder.clientId)
 
                 _client.value = when (clientResult) {
                     is Result.Success -> clientResult.data

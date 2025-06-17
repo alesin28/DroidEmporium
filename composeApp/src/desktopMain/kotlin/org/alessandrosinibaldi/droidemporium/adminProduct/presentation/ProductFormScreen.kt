@@ -19,7 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
-import org.alessandrosinibaldi.droidemporium.adminCategory.domain.Category
+import org.alessandrosinibaldi.droidemporium.commonCategory.domain.Category
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 

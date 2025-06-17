@@ -10,15 +10,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
-import org.alessandrosinibaldi.droidemporium.adminClient.domain.ClientRepository
-import org.alessandrosinibaldi.droidemporium.adminOrder.domain.OrderRepository
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
 import kotlinx.coroutines.flow.map
+import org.alessandrosinibaldi.droidemporium.adminClient.domain.AdminClientRepository
+import org.alessandrosinibaldi.droidemporium.commonOrder.domain.OrderRepository
 
 
 class OrderListViewModel(
     private val orderRepository: OrderRepository,
-    private val clientRepository: ClientRepository
+    private val adminClientRepository: AdminClientRepository
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
@@ -45,7 +45,7 @@ class OrderListViewModel(
                 flowOf(emptyList())
             } else {
                 val clientIds = orders.map { it.clientId }.toSet()
-                clientRepository.getClientsByIds(clientIds)
+                adminClientRepository.getClientsByIds(clientIds)
                     .map { clientsResult ->
                         val clients = when (clientsResult) {
                             is Result.Success -> clientsResult.data

@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.flow
 import org.alessandrosinibaldi.droidemporium.adminOrder.data.dto.OrderDto
 import org.alessandrosinibaldi.droidemporium.adminOrder.data.dto.OrderLineDto
 import org.alessandrosinibaldi.droidemporium.adminOrder.data.dto.toDomain
-import org.alessandrosinibaldi.droidemporium.adminOrder.domain.Order
-import org.alessandrosinibaldi.droidemporium.adminOrder.domain.OrderRepository
+import org.alessandrosinibaldi.droidemporium.commonOrder.domain.Order
+import org.alessandrosinibaldi.droidemporium.commonOrder.domain.OrderRepository
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
 
 class FirestoreOrderRepository : OrderRepository {

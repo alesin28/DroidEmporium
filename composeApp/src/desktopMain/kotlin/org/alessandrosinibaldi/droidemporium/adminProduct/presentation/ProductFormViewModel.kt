@@ -11,10 +11,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import org.alessandrosinibaldi.droidemporium.adminCategory.domain.Category
-import org.alessandrosinibaldi.droidemporium.adminCategory.domain.CategoryRepository
-import org.alessandrosinibaldi.droidemporium.adminProduct.domain.Product
-import org.alessandrosinibaldi.droidemporium.adminProduct.domain.ProductRepository
+import org.alessandrosinibaldi.droidemporium.adminProduct.domain.AdminProductRepository
+import org.alessandrosinibaldi.droidemporium.commonCategory.domain.Category
+import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
+import org.alessandrosinibaldi.droidemporium.commonCategory.domain.CategoryRepository
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
 
 sealed interface ProductFormEvent {
@@ -22,7 +22,7 @@ sealed interface ProductFormEvent {
 }
 
 class ProductFormViewModel(
-    private val productRepository: ProductRepository,
+    private val adminProductRepository: AdminProductRepository,
     private val categoryRepository: CategoryRepository,
     private val productId: String?
 ) : ViewModel() {
@@ -100,9 +100,9 @@ class ProductFormViewModel(
                     isActive = isActive,
                     categoryId = categoryId ?: ""
                 )
-                productRepository.updateProduct(updatedProduct)
+                adminProductRepository.updateProduct(updatedProduct)
             } else {
-                productRepository.addProduct(
+                adminProductRepository.addProduct(
                     name = name,
                     description = description,
                     price = price.toDoubleOrNull() ?: 0.0,
@@ -131,7 +131,7 @@ class ProductFormViewModel(
         isLoading = true
         viewModelScope.launch {
             try {
-                when (val result = productRepository.getProductById(id)) {
+                when (val result = adminProductRepository.getProductById(id)) {
                     is Result.Success -> {
                         val product = result.data
                         if (product != null) {

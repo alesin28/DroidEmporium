@@ -18,8 +18,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 // We no longer need the separate Order and Client domain imports here
-// import org.alessandrosinibaldi.droidemporium.adminOrder.domain.Order
-// import org.alessandrosinibaldi.droidemporium.adminClient.domain.Client
+// import org.alessandrosinibaldi.droidemporium.commonOrder.domain.Order
+// import org.alessandrosinibaldi.droidemporium.commonClient.domain.Client
 import org.koin.compose.viewmodel.koinViewModel
 import org.alessandrosinibaldi.droidemporium.adminOrder.components.OrderItem
 import org.alessandrosinibaldi.droidemporium.app.Route

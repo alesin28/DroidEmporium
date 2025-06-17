@@ -15,11 +15,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import org.alessandrosinibaldi.droidemporium.adminProduct.domain.Product
+import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import org.alessandrosinibaldi.droidemporium.adminCategory.domain.Category
+import org.alessandrosinibaldi.droidemporium.commonCategory.domain.Category
 
 @Composable
 fun ProductItem(

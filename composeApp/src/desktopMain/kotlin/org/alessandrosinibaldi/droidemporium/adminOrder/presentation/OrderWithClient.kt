@@ -1,7 +1,7 @@
 package org.alessandrosinibaldi.droidemporium.adminOrder.presentation
 
-import org.alessandrosinibaldi.droidemporium.adminClient.domain.Client
-import org.alessandrosinibaldi.droidemporium.adminOrder.domain.Order
+import org.alessandrosinibaldi.droidemporium.commonClient.domain.Client
+import org.alessandrosinibaldi.droidemporium.commonOrder.domain.Order
 
 data class OrderWithClient(
     val order: Order,

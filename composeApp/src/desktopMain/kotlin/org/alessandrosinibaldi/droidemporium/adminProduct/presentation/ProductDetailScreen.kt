@@ -11,8 +11,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import org.alessandrosinibaldi.droidemporium.adminCategory.domain.Category
-import org.alessandrosinibaldi.droidemporium.adminProduct.domain.Product
+import org.alessandrosinibaldi.droidemporium.commonCategory.domain.Category
+import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 

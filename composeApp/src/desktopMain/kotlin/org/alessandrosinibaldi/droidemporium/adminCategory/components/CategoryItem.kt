@@ -15,8 +15,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.alessandrosinibaldi.droidemporium.adminCategory.domain.Category
-import org.alessandrosinibaldi.droidemporium.adminProduct.domain.Product
+import org.alessandrosinibaldi.droidemporium.commonCategory.domain.Category
+import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue

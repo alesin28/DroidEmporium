@@ -13,14 +13,14 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
-import org.alessandrosinibaldi.droidemporium.adminClient.domain.Client
-import org.alessandrosinibaldi.droidemporium.adminClient.domain.ClientRepository
+import org.alessandrosinibaldi.droidemporium.commonClient.domain.Client
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
 import kotlinx.coroutines.flow.map
+import org.alessandrosinibaldi.droidemporium.adminClient.domain.AdminClientRepository
 
 
 class ClientListViewModel(
-    private val clientRepository: ClientRepository,
+    private val adminClientRepository: AdminClientRepository,
 
     ) : ViewModel() {
 
@@ -73,7 +73,7 @@ class ClientListViewModel(
         val clientsSourceFlow: Flow<Result<List<Client>>> = _searchQuery
             .debounce(300L)
             .flatMapLatest { clientQuery ->
-                clientRepository.searchClients(clientQuery)
+                adminClientRepository.searchClients(clientQuery)
             }
 
         val unwrappedClientsFlow: Flow<List<Client>> = clientsSourceFlow

@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.alessandrosinibaldi.droidemporium.adminCategory.data.dto.CategoryDto
 import org.alessandrosinibaldi.droidemporium.adminCategory.data.dto.toDomain
-import org.alessandrosinibaldi.droidemporium.adminCategory.domain.Category
-import org.alessandrosinibaldi.droidemporium.adminCategory.domain.CategoryRepository
+import org.alessandrosinibaldi.droidemporium.commonCategory.domain.Category
+import org.alessandrosinibaldi.droidemporium.commonCategory.domain.CategoryRepository
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
 
 

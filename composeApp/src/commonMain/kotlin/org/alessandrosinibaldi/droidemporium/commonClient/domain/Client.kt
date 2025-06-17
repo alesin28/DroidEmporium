@@ -1,5 +1,4 @@
-package org.alessandrosinibaldi.droidemporium.adminClient.domain
-
+package org.alessandrosinibaldi.droidemporium.commonClient.domain
 
 data class Client(
     val id: String,

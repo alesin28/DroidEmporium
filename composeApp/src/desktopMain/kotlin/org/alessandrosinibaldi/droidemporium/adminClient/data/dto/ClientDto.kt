@@ -1,7 +1,7 @@
 package org.alessandrosinibaldi.droidemporium.adminClient.data.dto
 
 import kotlinx.serialization.Serializable
-import org.alessandrosinibaldi.droidemporium.adminClient.domain.Client
+import org.alessandrosinibaldi.droidemporium.commonClient.domain.Client
 
 @Serializable
 data class ClientDto(

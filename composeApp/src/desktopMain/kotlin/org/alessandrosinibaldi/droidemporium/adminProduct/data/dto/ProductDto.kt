@@ -1,7 +1,7 @@
 package org.alessandrosinibaldi.droidemporium.adminProduct.data.dto
 
 import kotlinx.serialization.Serializable
-import org.alessandrosinibaldi.droidemporium.adminProduct.domain.Product
+import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
 
 
 @Serializable

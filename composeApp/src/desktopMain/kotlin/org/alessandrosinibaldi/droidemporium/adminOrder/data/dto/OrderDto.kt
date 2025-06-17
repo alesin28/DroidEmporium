@@ -3,8 +3,8 @@ package org.alessandrosinibaldi.droidemporium.adminOrder.data.dto
 import dev.gitlive.firebase.firestore.Timestamp
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
-import org.alessandrosinibaldi.droidemporium.adminOrder.domain.Order
-import org.alessandrosinibaldi.droidemporium.adminOrder.domain.OrderLine
+import org.alessandrosinibaldi.droidemporium.commonOrder.domain.Order
+import org.alessandrosinibaldi.droidemporium.commonOrder.domain.OrderLine
 
 @Serializable
 data class OrderDto(

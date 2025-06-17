@@ -19,8 +19,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.alessandrosinibaldi.droidemporium.adminClient.domain.Client
-import org.alessandrosinibaldi.droidemporium.adminOrder.domain.Order
+import org.alessandrosinibaldi.droidemporium.commonClient.domain.Client
+import org.alessandrosinibaldi.droidemporium.commonOrder.domain.Order
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 

@@ -28,7 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import org.alessandrosinibaldi.droidemporium.adminClient.components.ClientItem
-import org.alessandrosinibaldi.droidemporium.adminClient.domain.Client
+import org.alessandrosinibaldi.droidemporium.commonClient.domain.Client
 import org.alessandrosinibaldi.droidemporium.adminClient.presentation.ClientListViewModel.SortColumn
 import org.koin.compose.viewmodel.koinViewModel
 

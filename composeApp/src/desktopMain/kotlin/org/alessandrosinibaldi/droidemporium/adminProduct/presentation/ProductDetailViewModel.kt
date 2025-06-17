@@ -6,14 +6,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.alessandrosinibaldi.droidemporium.adminCategory.domain.Category
-import org.alessandrosinibaldi.droidemporium.adminCategory.domain.CategoryRepository
-import org.alessandrosinibaldi.droidemporium.adminProduct.domain.Product
-import org.alessandrosinibaldi.droidemporium.adminProduct.domain.ProductRepository
+import org.alessandrosinibaldi.droidemporium.adminProduct.domain.AdminProductRepository
+import org.alessandrosinibaldi.droidemporium.commonCategory.domain.Category
+import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
+import org.alessandrosinibaldi.droidemporium.commonCategory.domain.CategoryRepository
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
 
 class ProductDetailViewModel(
-    private val productRepository: ProductRepository,
+    private val adminProductRepository: AdminProductRepository,
     private val categoryRepository: CategoryRepository,
     private val productId: String?
 ) : ViewModel() {
@@ -31,7 +31,7 @@ class ProductDetailViewModel(
 
     private fun loadProduct(id: String) {
         viewModelScope.launch {
-            _product.value = when (val productResult = productRepository.getProductById(id)) {
+            _product.value = when (val productResult = adminProductRepository.getProductById(id)) {
                 is Result.Success -> {
                     productResult.data
                 }
