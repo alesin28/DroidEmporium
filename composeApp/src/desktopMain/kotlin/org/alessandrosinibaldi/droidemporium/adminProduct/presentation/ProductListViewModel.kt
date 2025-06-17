@@ -18,6 +18,8 @@ import org.alessandrosinibaldi.droidemporium.adminCategory.domain.Category
 import org.alessandrosinibaldi.droidemporium.adminCategory.domain.CategoryRepository
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.Product
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.ProductRepository
+import org.alessandrosinibaldi.droidemporium.core.domain.Result
+import kotlinx.coroutines.flow.map
 
 class ProductListViewModel(
     private val productRepository: ProductRepository,
@@ -101,68 +103,97 @@ class ProductListViewModel(
 
     //private val _products = MutableStateFlow<List<Product>>(emptyList())
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-    val products: StateFlow<List<Product>> = combine(
-        _searchQuery.debounce(300L)
+    val products: StateFlow<List<Product>> = run {
+        val productsSourceFlow: Flow<Result<List<Product>>> = _searchQuery
+            .debounce(300L)
             .flatMapLatest { productQuery ->
                 productRepository.searchProducts(productQuery)
-            },
-        sortStateFlow,
-        filterStateFlow,
-        activeFilterStateFlow
-    ) { productsList, sortState, filterState, activeFilterState ->
-        val sortedList = when (sortState.sortColumn) {
-            SortColumn.NAME -> {
-                if (sortState.sortDirection == SortDirection.ASCENDING) {
-                    productsList.sortedBy { it.name }
-                } else {
-                    productsList.sortedByDescending { it.name }
+            }
+        val unwrappedProductsFlow: Flow<List<Product>> = productsSourceFlow
+            .map { result ->
+                when (result) {
+                    is Result.Success -> result.data
+                    is Result.Failure -> {
+                        println("Error searching products: ${result.exception.message}")
+                        emptyList()
+                    }
                 }
             }
+        combine(
+            unwrappedProductsFlow,
+            sortStateFlow,
+            filterStateFlow,
+            activeFilterStateFlow
+        ) { productsList, sortState, filterState, activeFilterState ->
 
-            SortColumn.PRICE -> {
-                if (sortState.sortDirection == SortDirection.ASCENDING) {
-                    productsList.sortedBy { it.price }
-                } else {
-                    productsList.sortedByDescending { it.price }
+            val sortedList = when (sortState.sortColumn) {
+                SortColumn.NAME -> {
+                    if (sortState.sortDirection == SortDirection.ASCENDING) {
+                        productsList.sortedBy { it.name }
+                    } else {
+                        productsList.sortedByDescending { it.name }
+                    }
                 }
+
+                SortColumn.PRICE -> {
+                    if (sortState.sortDirection == SortDirection.ASCENDING) {
+                        productsList.sortedBy { it.price }
+                    } else {
+                        productsList.sortedByDescending { it.price }
+                    }
+                }
+
+                SortColumn.STOCK -> {
+                    if (sortState.sortDirection == SortDirection.ASCENDING) {
+                        productsList.sortedBy { it.stock }
+                    } else {
+                        productsList.sortedByDescending { it.stock }
+                    }
+                }
+
+                SortColumn.NONE -> productsList
             }
 
-            SortColumn.STOCK -> {
-                if (sortState.sortDirection == SortDirection.ASCENDING) {
-                    productsList.sortedBy { it.stock }
+            sortedList.filter { product ->
+                val priceStockMatch =
+                    product.price >= filterState.minPrice && product.price <= filterState.maxPrice &&
+                            product.stock >= filterState.minStock && product.stock <= filterState.maxStock
+
+                val statusMatch = if (activeFilterState.isActive == activeFilterState.isInactive) {
+                    true
                 } else {
-                    productsList.sortedByDescending { it.stock }
+                    product.isActive == activeFilterState.isActive
+                }
+
+                val categoryMatch = if (filterState.selectedCategories.isEmpty()) {
+                    true
+                } else {
+                    filterState.selectedCategories.contains(product.categoryId)
+                }
+                priceStockMatch && statusMatch && categoryMatch
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+    }
+
+
+    val categories: StateFlow<List<Category>> = categoryRepository
+        .searchCategories("")
+        .map { result ->
+            when (result) {
+                is Result.Success -> {
+                    result.data
+                }
+
+                is Result.Failure -> {
+                    println("Error fetching categories for filter list: ${result.exception.message}")
+                    emptyList()
                 }
             }
-
-            SortColumn.NONE -> productsList
         }
-
-        sortedList.filter { product ->
-            val priceStockMatch =
-                product.price >= filterState.minPrice && product.price <= filterState.maxPrice &&
-                        product.stock >= filterState.minStock && product.stock <= filterState.maxStock
-
-            val statusMatch = if (activeFilterState.isActive == activeFilterState.isInactive) {
-                true
-            } else {
-                product.isActive == activeFilterState.isActive
-            }
-
-            val categoryMatch = if (filterState.selectedCategories.isEmpty()) {
-                true
-            } else {
-                filterState.selectedCategories.contains(product.categoryId)
-            }
-            priceStockMatch && statusMatch && categoryMatch
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
-
-    val categories: StateFlow<List<Category>> = categoryRepository.searchCategories()
         .stateIn(
             scope = viewModelScope,
             started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
@@ -216,7 +247,15 @@ class ProductListViewModel(
 
     fun deleteProduct(product: Product) {
         viewModelScope.launch {
-            productRepository.deleteProduct(product)
+            val result = productRepository.deleteProduct(product.id)
+            when (result) {
+                is Result.Success -> {
+                    println("Successfully deleted product ${product.id}")
+                }
+                is Result.Failure -> {
+                    println("Failed to delete product ${product.id}: ${result.exception.message}")
+                }
+            }
         }
     }
 

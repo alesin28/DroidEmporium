@@ -65,7 +65,8 @@ fun ProductFormScreen(
         onCategoryChange = viewModel::onCategoryChange,
         onAddProduct = viewModel::addProduct,
         isSaving = viewModel.isSaving,
-        isLoading = viewModel.isLoading
+        isLoading = viewModel.isLoading,
+        onNavigateBack = viewModel::onFormCancel
     )
 }
 
@@ -88,6 +89,7 @@ fun ProductFormScreenContent(
     onAddProduct: () -> Unit,
     isSaving: Boolean,
     isLoading: Boolean,
+    onNavigateBack: () -> Unit
 ) {
 
     var expanded by remember { mutableStateOf(false) }
@@ -188,6 +190,9 @@ fun ProductFormScreenContent(
                 enabled = !isSaving
             ) {
                 Text("Add Product")
+            }
+            Button(onClick = onNavigateBack) {
+                Text("Cancel")
             }
         }
     }

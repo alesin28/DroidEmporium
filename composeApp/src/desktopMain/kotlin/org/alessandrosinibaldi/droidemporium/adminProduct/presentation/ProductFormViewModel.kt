@@ -15,6 +15,7 @@ import org.alessandrosinibaldi.droidemporium.adminCategory.domain.Category
 import org.alessandrosinibaldi.droidemporium.adminCategory.domain.CategoryRepository
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.Product
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.ProductRepository
+import org.alessandrosinibaldi.droidemporium.core.domain.Result
 
 sealed interface ProductFormEvent {
     data object NavigateBack : ProductFormEvent
@@ -76,6 +77,12 @@ class ProductFormViewModel(
         categoryId = selectedCategoryId
     }
 
+    fun onFormCancel() {
+        viewModelScope.launch {
+            _eventChannel.send(ProductFormEvent.NavigateBack)
+        }
+    }
+
     fun addProduct() {
 
         if (isSaving || isLoading) return
@@ -83,28 +90,39 @@ class ProductFormViewModel(
 
 
         viewModelScope.launch {
-            isSaving = true
-
-            if (isEditMode && productId != null) {
+            val result: Result<Unit> = if (isEditMode && productId != null) {
                 val updatedProduct = Product(
                     id = productId,
                     name = name,
                     description = description,
-                    price = price.toDouble(),
-                    stock = stock.toInt(),
+                    price = price.toDoubleOrNull() ?: 0.0,
+                    stock = stock.toIntOrNull() ?: 0,
                     isActive = isActive,
-                    categoryId = categoryId.toString()
+                    categoryId = categoryId ?: ""
                 )
                 productRepository.updateProduct(updatedProduct)
             } else {
                 productRepository.addProduct(
-                    name, description, price.toDouble(), stock.toInt(), isActive,
-                    categoryId.toString()
+                    name = name,
+                    description = description,
+                    price = price.toDoubleOrNull() ?: 0.0,
+                    stock = stock.toIntOrNull() ?: 0,
+                    isActive = isActive,
+                    categoryId = categoryId ?: ""
                 )
-
             }
 
-            _eventChannel.send(ProductFormEvent.NavigateBack)
+            when (result) {
+                is Result.Success -> {
+                    println("Product saved successfully.")
+                    _eventChannel.send(ProductFormEvent.NavigateBack)
+                }
+
+                is Result.Failure -> {
+                    println("Failed to save product: ${result.exception.message}")
+                    isSaving = false
+                }
+            }
         }
 
     }
@@ -112,28 +130,52 @@ class ProductFormViewModel(
     private fun loadProduct(id: String) {
         isLoading = true
         viewModelScope.launch {
-            val product = productRepository.getProductById(id)
-            if (product != null) {
-                name = product.name
-                description = product.description
-                price = product.price.toString()
-                stock = product.stock.toString()
-                isActive = product.isActive
-                categoryId = product.categoryId
-            }
-            isLoading = false
-        }
+            try {
+                when (val result = productRepository.getProductById(id)) {
+                    is Result.Success -> {
+                        val product = result.data
+                        if (product != null) {
+                            name = product.name
+                            description = product.description
+                            price = product.price.toString()
+                            stock = product.stock.toString()
+                            isActive = product.isActive
+                            categoryId = product.categoryId
+                        } else {
+                            println("Product with ID $id not found.")
+                        }
+                    }
 
+                    is Result.Failure -> {
+                        println("Error loading product: ${result.exception.message}")
+                    }
+                }
+            } finally {
+                isLoading = false
+            }
+        }
     }
+
 
     private fun loadAvailableCategories() {
         viewModelScope.launch {
-            categoryRepository.searchCategories().collect { categoryList ->
-                _categories.value = categoryList
-                if (!isEditMode) {
-                    categoryId = categoryList.first().id.toString()
+            categoryRepository.searchCategories("")
+                .collect { result ->
+                    when (result) {
+                        is Result.Success -> {
+                            val actualList = result.data
+                            _categories.value = actualList
+                            if (!isEditMode) {
+                                categoryId = actualList.first().id
+                            }
+                        }
+
+                        is Result.Failure -> {
+                            println("Error loading available categories: ${result.exception.message}")
+                            _categories.value = emptyList()
+                        }
+                    }
                 }
-            }
         }
 
     }

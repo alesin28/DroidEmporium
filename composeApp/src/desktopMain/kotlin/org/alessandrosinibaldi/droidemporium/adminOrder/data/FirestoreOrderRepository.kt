@@ -7,102 +7,73 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import org.alessandrosinibaldi.droidemporium.adminClient.domain.Client
+import org.alessandrosinibaldi.droidemporium.adminOrder.data.dto.OrderDto
+import org.alessandrosinibaldi.droidemporium.adminOrder.data.dto.OrderLineDto
+import org.alessandrosinibaldi.droidemporium.adminOrder.data.dto.toDomain
 import org.alessandrosinibaldi.droidemporium.adminOrder.domain.Order
-import org.alessandrosinibaldi.droidemporium.adminOrder.domain.OrderLine
 import org.alessandrosinibaldi.droidemporium.adminOrder.domain.OrderRepository
+import org.alessandrosinibaldi.droidemporium.core.domain.Result
 
 class FirestoreOrderRepository : OrderRepository {
 
 
     private val firestore = Firebase.firestore
     private val ordersCollection = firestore.collection("orders")
-    private val clientsCollection = firestore.collection("clients")
+    //private val clientsCollection = firestore.collection("clients")
 
 
-    override fun searchOrders(query: String?): Flow<Pair<List<Order>, List<Client>>> = flow {
-        ordersCollection.snapshots.collect { querySnapshot ->
-            val orders = coroutineScope {
-                querySnapshot.documents.map { documentSnapshot ->
-                    async {
-                        val baseOrderData = documentSnapshot.data<Order>()
+    override fun searchOrders(query: String): Flow<Result<List<Order>>> = flow {
+        try {
+            ordersCollection.snapshots.collect { querySnapshot ->
 
-                        val fetchedOrderLines = getOrderLines(documentSnapshot.id)
-
-                        Order(
-                            id = documentSnapshot.id,
-                            clientId = baseOrderData.clientId,
-                            orderDate = baseOrderData.orderDate,
-                            totalAmount = baseOrderData.totalAmount,
-                            lines = fetchedOrderLines
-                        )
-                    }
-                }.awaitAll()
-            }
-            val clientIds = orders.map { it.clientId }
-                .distinct()
-
-
-            val clients = mutableListOf<Client>()
-            if (clientIds.isNotEmpty()) {
-                coroutineScope {
-                    val coroutineClients = clientIds.map { clientId ->
+                val allOrders = coroutineScope {
+                    querySnapshot.documents.map { orderDoc ->
                         async {
-                            val clientDocSnapshot =
-                                clientsCollection.document(clientId).get() // Suspend call
-                            clientDocSnapshot.data<Client>().copy(id = clientDocSnapshot.id)
+                            val linesSnapshot = orderDoc.reference.collection("orderLines").get()
+                            val domainLines = linesSnapshot.documents.map { lineDoc ->
+                                lineDoc.data<OrderLineDto>().toDomain(id = lineDoc.id)
+                            }
 
+                            val orderDto = orderDoc.data<OrderDto>()
 
+                            orderDto.toDomain(id = orderDoc.id, lines = domainLines)
                         }
                     }
-                    clients.addAll(coroutineClients.awaitAll())
+                }.awaitAll()
+
+                val filteredList = if (query.isBlank()) {
+                    allOrders
+                } else {
+                    val lowerCaseQuery = query.lowercase()
+                    allOrders.filter { order ->
+                        order.clientId.lowercase().contains(lowerCaseQuery)
+                    }
                 }
+
+                emit(Result.Success(filteredList))
             }
-
-            emit(Pair(orders, clients))
+        } catch (e: Exception) {
+            emit(Result.Failure(e))
         }
-
-
     }
 
-    override suspend fun getOrderById(id: String): Pair<Order, Client>? {
-
-        val orderDocSnapshot = ordersCollection.document(id).get()
-        if (orderDocSnapshot.exists) {
-            val orderData = orderDocSnapshot.data<Order>()
-
-            val lines = getOrderLines(orderDocSnapshot.id)
-
-            val order = Order(
-                id = orderDocSnapshot.id,
-                clientId = orderData.clientId,
-                orderDate = orderData.orderDate,
-                totalAmount = orderData.totalAmount,
-                lines = lines
-            )
-
-
-            val clientDocSnapshot = clientsCollection.document(order.clientId).get()
-
-            if (clientDocSnapshot.exists) {
-                val client = clientDocSnapshot.data<Client>()
-                    .copy(id = clientDocSnapshot.id)
-                return Pair(order, client)
+    override suspend fun getOrderById(id: String): Result<Order?> {
+        return try {
+            val orderSnapshot = ordersCollection.document(id).get()
+            if (orderSnapshot.exists) {
+                val linesSnapshot = orderSnapshot.reference.collection("orderLines").get()
+                val domainLines = linesSnapshot.documents.map { lineDoc ->
+                    lineDoc.data<OrderLineDto>().toDomain(id = lineDoc.id)
+                }
+                val orderDto = orderSnapshot.data<OrderDto>()
+                val finalOrder = orderDto.toDomain(id = orderSnapshot.id, lines = domainLines)
+                Result.Success(finalOrder)
+            } else {
+                Result.Success(null)
             }
+        } catch (e: Exception) {
+            Result.Failure(e)
         }
-        return null
     }
 
-
-    private suspend fun getOrderLines(orderId: String): List<OrderLine> {
-        val linesSnapshot = ordersCollection.document(orderId)
-            .collection("orderLines")
-            .get()
-
-        return linesSnapshot.documents.map { lineDoc ->
-            val orderLineData = lineDoc.data<OrderLine>()
-            orderLineData.copy(id = lineDoc.id)
-        }
-
-    }
 }

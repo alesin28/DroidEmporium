@@ -17,41 +17,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import org.alessandrosinibaldi.droidemporium.adminOrder.domain.Order
+// We no longer need the separate Order and Client domain imports here
+// import org.alessandrosinibaldi.droidemporium.adminOrder.domain.Order
+// import org.alessandrosinibaldi.droidemporium.adminClient.domain.Client
 import org.koin.compose.viewmodel.koinViewModel
-import org.alessandrosinibaldi.droidemporium.adminClient.domain.Client
 import org.alessandrosinibaldi.droidemporium.adminOrder.components.OrderItem
 import org.alessandrosinibaldi.droidemporium.app.Route
-
 
 @Composable
 fun orderListScreen(
     viewModel: OrderListViewModel = koinViewModel(),
     navController: NavHostController
 ) {
-
-    val orders by viewModel.orders.collectAsState()
+    val ordersWithClients by viewModel.ordersWithClients.collectAsState()
 
     val onNavigateToOrderDetail: (String) -> Unit = { orderId ->
         navController.navigate(Route.OrderDetail(orderId = orderId))
     }
 
     orderListScreenContent(
-        orders = orders,
+        ordersWithClients = ordersWithClients,
         onNavigateToOrderDetail = onNavigateToOrderDetail
     )
-
 }
 
 @Composable
 fun orderListScreenContent(
-    orders: Pair<List<Order>, List<Client>>,
+    ordersWithClients: List<OrderWithClient>,
     onNavigateToOrderDetail: (String) -> Unit = {}
 ) {
-
-    val orderList = orders.first
-    val clientList = orders.second
-
     Surface(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -70,10 +64,10 @@ fun orderListScreenContent(
                         modifier = Modifier.weight(4f).background(color = Color.LightGray)
                     ) {
                         LazyColumn {
-                            items(orderList) { order ->
+                            items(ordersWithClients) { orderWithClient ->
                                 OrderItem(
-                                    order = order,
-                                    client = clientList.find { it.id == order.clientId },
+                                    order = orderWithClient.order,
+                                    client = orderWithClient.client,
                                     onNavigateToOrderDetail = onNavigateToOrderDetail
                                 )
                             }
@@ -88,8 +82,6 @@ fun orderListScreenContent(
                     Text("Filters")
                 }
             }
-
         }
     }
-
 }

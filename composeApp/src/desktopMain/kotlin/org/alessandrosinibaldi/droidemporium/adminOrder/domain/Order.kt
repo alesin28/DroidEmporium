@@ -1,13 +1,11 @@
 package org.alessandrosinibaldi.droidemporium.adminOrder.domain
 
-import dev.gitlive.firebase.firestore.Timestamp
-import kotlinx.serialization.Serializable
+import kotlinx.datetime.Instant
 
-@Serializable
 data class Order(
-    val id: String? = null,
+    val id: String,
     val clientId: String,
-    val orderDate: Timestamp,
+    val orderDate: Instant,
     val totalAmount: Double,
     val lines: List<OrderLine> = emptyList()
 )

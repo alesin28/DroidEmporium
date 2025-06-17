@@ -6,6 +6,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -14,8 +15,11 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import org.alessandrosinibaldi.droidemporium.adminClient.domain.Client
 import org.alessandrosinibaldi.droidemporium.adminClient.domain.ClientRepository
+import org.alessandrosinibaldi.droidemporium.core.domain.Result
+import kotlinx.coroutines.flow.map
 
-class ClientListViewModel (
+
+class ClientListViewModel(
     private val clientRepository: ClientRepository,
 
     ) : ViewModel() {
@@ -33,7 +37,6 @@ class ClientListViewModel (
 
     private val _sortDirection = MutableStateFlow(SortDirection.ASCENDING)
     //val sortDirection: StateFlow<SortDirection> = _sortDirection.asStateFlow()
-
 
 
     private val _searchQuery = MutableStateFlow<String>("")
@@ -65,42 +68,56 @@ class ClientListViewModel (
     }
 
 
-    //private val _products = MutableStateFlow<List<Product>>(emptyList())
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-    val clients: StateFlow<List<Client>> = combine(
-        _searchQuery.debounce(300L)
-            .flatMapLatest { productQuery ->
-                clientRepository.searchClients(productQuery)
-            },
-        sortStateFlow,
-        activeFilterStateFlow
-    ) { clientList, sortState, activeFilterState ->
-        val sortedList = when (sortState.sortColumn) {
-            SortColumn.NAME -> {
-                if (sortState.sortDirection == SortDirection.ASCENDING) {
-                    clientList.sortedBy { it.displayName }
-                } else {
-                    clientList.sortedByDescending { it.displayName }
+    val clients: StateFlow<List<Client>> = run {
+        val clientsSourceFlow: Flow<Result<List<Client>>> = _searchQuery
+            .debounce(300L)
+            .flatMapLatest { clientQuery ->
+                clientRepository.searchClients(clientQuery)
+            }
+
+        val unwrappedClientsFlow: Flow<List<Client>> = clientsSourceFlow
+            .map { result ->
+                when (result) {
+                    is Result.Success -> result.data
+                    is Result.Failure -> {
+                        println("Error searching clients: ${result.exception.message}")
+                        emptyList()
+                    }
                 }
             }
 
-            SortColumn.NONE -> clientList
-        }
+        combine(
+            unwrappedClientsFlow, // <-- Use the clean flow here
+            sortStateFlow,
+            activeFilterStateFlow
+        ) { clientList, sortState, activeFilterState ->
+            val sortedList = when (sortState.sortColumn) {
+                SortColumn.NAME -> {
+                    if (sortState.sortDirection == SortDirection.ASCENDING) {
+                        clientList.sortedBy { it.displayName }
+                    } else {
+                        clientList.sortedByDescending { it.displayName }
+                    }
+                }
 
-        sortedList.filter { product ->
-
-            val statusMatch = if (activeFilterState.isActive == activeFilterState.isInactive) {
-                true
-            } else {
-                product.isActive == activeFilterState.isActive
+                SortColumn.NONE -> clientList
             }
-            statusMatch
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
+
+            sortedList.filter { client ->
+                val statusMatch = if (activeFilterState.isActive == activeFilterState.isInactive) {
+                    true
+                } else {
+                    client.isActive == activeFilterState.isActive
+                }
+                statusMatch
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+    }
 
 
     fun updateSort(clickedColumn: SortColumn) {
@@ -128,7 +145,6 @@ class ClientListViewModel (
     fun updateInactiveFilter(isInactive: Boolean) {
         _isInactiveFilter.value = isInactive
     }
-
 
 
     data class SortState(

@@ -10,6 +10,7 @@ import org.alessandrosinibaldi.droidemporium.adminCategory.domain.Category
 import org.alessandrosinibaldi.droidemporium.adminCategory.domain.CategoryRepository
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.Product
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.ProductRepository
+import org.alessandrosinibaldi.droidemporium.core.domain.Result
 
 class ProductDetailViewModel(
     private val productRepository: ProductRepository,
@@ -30,10 +31,33 @@ class ProductDetailViewModel(
 
     private fun loadProduct(id: String) {
         viewModelScope.launch {
-            _product.value = productRepository.getProductById(id)
-            _category.value = categoryRepository.getCategoryById(productId.toString())
-        }
+            _product.value = when (val productResult = productRepository.getProductById(id)) {
+                is Result.Success -> {
+                    productResult.data
+                }
 
+                is Result.Failure -> {
+                    println("Error fetching product detail: ${productResult.exception.message}")
+                    null
+                }
+            }
+
+            val fetchedProductId = _product.value?.categoryId
+            if (fetchedProductId != null) {
+                _category.value = when (val categoryResult =
+                    categoryRepository.getCategoryById(fetchedProductId)) {
+                    is Result.Success -> {
+                        categoryResult.data
+                    }
+
+                    is Result.Failure -> {
+                        println("Error fetching category for product detail: ${categoryResult.exception.message}")
+                        null
+                    }
+                }
+            }
+        }
     }
 
 }
+

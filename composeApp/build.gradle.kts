@@ -45,6 +45,7 @@ kotlin {
             implementation(libs.kotlin.test)
             implementation(libs.gitlive.firebase.firestore)
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.jetbrains.compose.navigation)
             implementation(libs.koin.core)

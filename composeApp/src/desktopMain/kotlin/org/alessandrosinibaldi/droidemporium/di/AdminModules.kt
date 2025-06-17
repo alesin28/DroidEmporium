@@ -67,6 +67,7 @@ val appModule = module {
     viewModel { params ->
         OrderDetailViewModel(
             orderRepository = get(),
+            clientRepository = get(),
             orderId = params.getOrNull()
         )
     }
