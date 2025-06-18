@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,7 +22,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -127,7 +127,7 @@ fun productScreenContent(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Color(0xFFADD8E6)
+        color = MaterialTheme.colorScheme.background
     ) {
         Box(
             modifier = Modifier
@@ -155,7 +155,7 @@ fun productScreenContent(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(color = Color.LightGray)
+                                .background(color = MaterialTheme.colorScheme.surfaceVariant)
                                 .padding(8.dp)
                                 .height(IntrinsicSize.Min)
                         ) {
@@ -168,7 +168,7 @@ fun productScreenContent(
                             )
                             VerticalDivider(
                                 thickness = 1.dp,
-                                color = MaterialTheme.colorScheme.secondary
+                                color = MaterialTheme.colorScheme.outline
                             )
                             TableHeader(
                                 text = "Category",
@@ -177,7 +177,7 @@ fun productScreenContent(
                             )
                             VerticalDivider(
                                 thickness = 1.dp,
-                                color = MaterialTheme.colorScheme.secondary
+                                color = MaterialTheme.colorScheme.outline
                             )
                             TableHeader(
                                 text = "Price",
@@ -187,7 +187,7 @@ fun productScreenContent(
                             )
                             VerticalDivider(
                                 thickness = 1.dp,
-                                color = MaterialTheme.colorScheme.secondary
+                                color = MaterialTheme.colorScheme.outline
                             )
                             TableHeader(
                                 text = "Stock",
@@ -197,7 +197,7 @@ fun productScreenContent(
                             )
                             VerticalDivider(
                                 thickness = 1.dp,
-                                color = MaterialTheme.colorScheme.secondary
+                                color = MaterialTheme.colorScheme.outline
                             )
                             TableHeader(
                                 text = "Status",
@@ -206,7 +206,7 @@ fun productScreenContent(
                             )
                             VerticalDivider(
                                 thickness = 1.dp,
-                                color = MaterialTheme.colorScheme.secondary
+                                color = MaterialTheme.colorScheme.outline
                             )
                             TableHeader(
                                 text = "Actions",
@@ -215,11 +215,9 @@ fun productScreenContent(
                             )
                         }
 
-                        HorizontalDivider(thickness = 1.dp)
+                        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
                         if (!products.isEmpty()) {
-                            LazyColumn(
-                                modifier = Modifier.background(color = MaterialTheme.colorScheme.surfaceVariant)
-                            ) {
+                            LazyColumn {
                                 items(products) { product ->
                                     categories.find { category -> category.id == product.categoryId }
                                         ?.let {
@@ -231,7 +229,7 @@ fun productScreenContent(
                                                 onNavigateToProductDetail = onNavigateToProductDetail
                                             )
                                         }
-                                    HorizontalDivider(thickness = 1.dp)
+                                    HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
                                 }
                             }
                         } else {
@@ -270,12 +268,11 @@ fun productScreenContent(
                                 },
                                 modifier = Modifier.weight(1f),
                                 label = { Text("Min Price") },
-                            )
-                            HorizontalDivider(
-                                modifier = Modifier
-                                    .padding(horizontal = 4.dp)
-                                    .weight(0.1f),
-                            )
+
+                                )
+
+                            Spacer(modifier = Modifier.weight(0.1f))
+
                             OutlinedTextField(
                                 value = maxPriceInput,
                                 onValueChange = { newPrice ->
@@ -312,6 +309,7 @@ fun productScreenContent(
                                 modifier = Modifier
                                     .padding(horizontal = 4.dp)
                                     .weight(0.1f),
+                                color = androidx.compose.ui.graphics.Color.Transparent
                             )
                             OutlinedTextField(
                                 value = maxStockInput,
@@ -349,12 +347,6 @@ fun productScreenContent(
                             )
                         }
 
-                        //LazyColumn {
-                        //    items(categories) {category ->
-                        //        Text(text = category.name)
-
-                        //    }
-                        //}
                         Text("Category", style = MaterialTheme.typography.titleMedium)
                         Column(
                             modifier = Modifier.padding(top = 8.dp)
@@ -441,9 +433,8 @@ fun RowScope.TableHeader(
             text = text,
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
     }
-
-
 }

@@ -42,7 +42,7 @@ fun ProductItem(
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
             .padding(8.dp)
-            .background(color = MaterialTheme.colorScheme.surfaceVariant),
+            .background(color = MaterialTheme.colorScheme.surface),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -52,19 +52,22 @@ fun ProductItem(
             text = product.name,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
+            color = MaterialTheme.colorScheme.onSurface
         )
         VerticalDivider(
             thickness = 1.dp,
-            color = MaterialTheme.colorScheme.secondary
+            color = MaterialTheme.colorScheme.outline
         )
         Text(
             modifier = Modifier.padding(horizontal = 8.dp)
                 .weight(categoryWeight),
             text = category.name,
             maxLines = 2,
+            color = MaterialTheme.colorScheme.onSurface
         )
         VerticalDivider(
-            thickness = 1.dp
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.outline
         )
         Text(
             modifier = Modifier.padding(horizontal = 8.dp)
@@ -72,9 +75,11 @@ fun ProductItem(
             text = "${product.price} €",
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
+            color = MaterialTheme.colorScheme.onSurface
         )
         VerticalDivider(
-            thickness = 1.dp
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.outline
         )
         Text(
             modifier = Modifier.padding(horizontal = 8.dp)
@@ -82,9 +87,11 @@ fun ProductItem(
             text = "${product.stock}",
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
+            color = MaterialTheme.colorScheme.onSurface
         )
         VerticalDivider(
-            thickness = 1.dp
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.outline
         )
         Text(
             modifier = Modifier.padding(horizontal = 8.dp)
@@ -92,9 +99,11 @@ fun ProductItem(
             text = if (product.isActive) "Active" else "Inactive",
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
+            color = MaterialTheme.colorScheme.onSurface
         )
         VerticalDivider(
-            thickness = 1.dp
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.outline
         )
         Column(modifier = Modifier.weight(actionsWeight)) {
             Button(
@@ -111,7 +120,5 @@ fun ProductItem(
                 Text(text = "Edit")
             }
         }
-
-
     }
 }

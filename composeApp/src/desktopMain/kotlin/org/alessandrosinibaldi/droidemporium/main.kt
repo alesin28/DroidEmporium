@@ -12,6 +12,7 @@ import dev.gitlive.firebase.app
 import kotlinx.coroutines.runBlocking
 import org.alessandrosinibaldi.droidemporium.app.AdminApp
 import org.alessandrosinibaldi.droidemporium.di.desktopAppModule
+import org.alessandrosinibaldi.droidemporium.ui.theme.DroidEmporiumTheme
 import org.koin.core.context.startKoin
 import java.io.File
 import java.io.FileInputStream
@@ -65,7 +66,9 @@ fun main() {
             onCloseRequest = ::exitApplication,
             title = "DroidEmporium",
         ) {
-            AdminApp()
+            DroidEmporiumTheme {
+                AdminApp()
+            }
         }
     }
 }
