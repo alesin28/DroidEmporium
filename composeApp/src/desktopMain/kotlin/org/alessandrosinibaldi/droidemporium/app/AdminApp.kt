@@ -32,7 +32,10 @@ fun AdminApp() {
 
         composable<Route.ProductDetail> { backStackEntry ->
             val productId = backStackEntry.arguments?.getString("productId")
-            ProductDetailScreen(productId = productId)
+            ProductDetailScreen(
+                productId = productId,
+                navController = navController
+            )
         }
 
 

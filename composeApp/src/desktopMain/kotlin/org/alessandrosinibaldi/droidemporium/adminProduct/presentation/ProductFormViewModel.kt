@@ -31,7 +31,6 @@ class ProductFormViewModel(
     private val productId: String?
 ) : ViewModel() {
 
-    // --- Existing State ---
     var name by mutableStateOf("")
     var description by mutableStateOf("")
     var price by mutableStateOf("")

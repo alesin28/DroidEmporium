@@ -5,7 +5,8 @@ import org.alessandrosinibaldi.droidemporium.adminCategory.presentation.Category
 import org.alessandrosinibaldi.droidemporium.adminClient.data.FirestoreClientRepository
 import org.alessandrosinibaldi.droidemporium.adminClient.domain.AdminClientRepository
 import org.alessandrosinibaldi.droidemporium.adminClient.presentation.ClientListViewModel
-import org.alessandrosinibaldi.droidemporium.adminOrder.data.FirestoreOrderRepository
+import org.alessandrosinibaldi.droidemporium.adminOrder.data.AdminFirestoreOrderRepository
+import org.alessandrosinibaldi.droidemporium.adminOrder.domain.AdminOrderRepository
 import org.alessandrosinibaldi.droidemporium.adminOrder.presentation.OrderDetailViewModel
 import org.alessandrosinibaldi.droidemporium.adminProduct.data.AdminFirestoreProductRepository
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductDetailViewModel
@@ -14,6 +15,8 @@ import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductLi
 import org.alessandrosinibaldi.droidemporium.adminOrder.presentation.OrderListViewModel
 import org.alessandrosinibaldi.droidemporium.adminProduct.data.CloudinaryUploader
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.AdminProductRepository
+import org.alessandrosinibaldi.droidemporium.adminReview.data.AdminFirestoreReviewRepository
+import org.alessandrosinibaldi.droidemporium.adminReview.domain.AdminReviewRepository
 import org.alessandrosinibaldi.droidemporium.commonCategory.domain.CategoryRepository
 import org.alessandrosinibaldi.droidemporium.commonOrder.domain.OrderRepository
 import org.koin.core.module.dsl.singleOf
@@ -29,7 +32,8 @@ val desktopAppModule = module {
     singleOf(::AdminFirestoreProductRepository).bind<AdminProductRepository>()
     singleOf(::FirestoreCategoryRepository).bind<CategoryRepository>()
     singleOf(::FirestoreClientRepository).bind<AdminClientRepository>()
-    singleOf(::FirestoreOrderRepository).bind<OrderRepository>()
+    singleOf(::AdminFirestoreOrderRepository).bind<AdminOrderRepository>()
+    singleOf(::AdminFirestoreReviewRepository).bind<AdminReviewRepository>()
 
     single { CloudinaryUploader() }
 
@@ -49,7 +53,9 @@ val desktopAppModule = module {
         ProductDetailViewModel(
             adminProductRepository = get(),
             categoryRepository = get(),
-            productId = params.getOrNull()
+            productId = params.getOrNull(),
+            adminReviewRepository = get(),
+            adminOrderRepository = get()
         )
     }
 

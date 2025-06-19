@@ -10,11 +10,11 @@ import kotlinx.coroutines.flow.flow
 import org.alessandrosinibaldi.droidemporium.adminOrder.data.dto.OrderDto
 import org.alessandrosinibaldi.droidemporium.adminOrder.data.dto.OrderLineDto
 import org.alessandrosinibaldi.droidemporium.adminOrder.data.dto.toDomain
+import org.alessandrosinibaldi.droidemporium.adminOrder.domain.AdminOrderRepository
 import org.alessandrosinibaldi.droidemporium.commonOrder.domain.Order
-import org.alessandrosinibaldi.droidemporium.commonOrder.domain.OrderRepository
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
 
-class FirestoreOrderRepository : OrderRepository {
+class AdminFirestoreOrderRepository : AdminOrderRepository {
 
 
     private val firestore = Firebase.firestore
@@ -71,6 +71,41 @@ class FirestoreOrderRepository : OrderRepository {
             } else {
                 Result.Success(null)
             }
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
+
+    override suspend fun getOrdersByProduct(productId: String): Result<List<Order>> {
+        return try {
+            val matchingLinesSnapshot = firestore.collectionGroup("orderLines")
+                .where { "productId" equalTo productId }
+                .get()
+
+            val orderIds = matchingLinesSnapshot.documents.mapNotNull { doc ->
+                doc.reference.parent.parent?.id
+            }.toSet()
+
+            if (orderIds.isEmpty()) {
+                return Result.Success(emptyList())
+            }
+
+            val orders = coroutineScope {
+                orderIds.map { id ->
+                    async { getOrderById(id) }
+                }.awaitAll()
+            }
+                .mapNotNull { result ->
+                    when (result) {
+                        is Result.Success -> result.data
+                        is Result.Failure -> {
+                            println("Failed to fetch an order details: ${result.exception.message}")
+                            null
+                        }
+                    }
+                }
+
+            Result.Success(orders)
         } catch (e: Exception) {
             Result.Failure(e)
         }

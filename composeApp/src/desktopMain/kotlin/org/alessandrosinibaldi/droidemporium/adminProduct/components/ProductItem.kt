@@ -1,18 +1,11 @@
 package org.alessandrosinibaldi.droidemporium.adminProduct.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
@@ -21,103 +14,84 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.alessandrosinibaldi.droidemporium.commonCategory.domain.Category
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.ui.text.font.FontWeight
+
+data class ProductItemWeights(
+    val name: Float, val category: Float, val price: Float,
+    val stock: Float, val active: Float, val actions: Float
+)
+
 @Composable
 fun ProductItem(
     product: Product,
     category: Category,
     deleteProduct: (Product) -> Unit,
     editProduct: (String) -> Unit,
-    onNavigateToProductDetail: (String) -> Unit
+    onNavigateToProductDetail: (String) -> Unit,
+    weights: ProductItemWeights
 ) {
-    val nameWeight = 3f
-    val categoryWeight = 1f
-    val priceWeight = 1f
-    val stockWeight = 1f
-    val activeWeight = 1f
-    val actionsWeight = 1f
-
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(IntrinsicSize.Min)
-            .padding(8.dp)
-            .background(color = MaterialTheme.colorScheme.surface),
+            .clickable { onNavigateToProductDetail(product.id) }
+            .padding(horizontal = 8.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Product Name (Clickable to see details)
         Text(
-            modifier = Modifier.padding(horizontal = 8.dp)
-                .weight(nameWeight)
-                .clickable { onNavigateToProductDetail(product.id.toString()) },
-            text = product.name,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            color = MaterialTheme.colorScheme.onSurface
+            modifier = Modifier.weight(weights.name).padding(horizontal = 8.dp),
+            text = product.name, maxLines = 2, overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+            color = MaterialTheme.colorScheme.primary
         )
-        VerticalDivider(
-            thickness = 1.dp,
-            color = MaterialTheme.colorScheme.outline
-        )
+        // Category
         Text(
-            modifier = Modifier.padding(horizontal = 8.dp)
-                .weight(categoryWeight),
-            text = category.name,
-            maxLines = 2,
-            color = MaterialTheme.colorScheme.onSurface
+            modifier = Modifier.weight(weights.category).padding(horizontal = 8.dp),
+            text = category.name, maxLines = 1, overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.bodyMedium
         )
-        VerticalDivider(
-            thickness = 1.dp,
-            color = MaterialTheme.colorScheme.outline
-        )
+        // Price
         Text(
-            modifier = Modifier.padding(horizontal = 8.dp)
-                .weight(priceWeight),
-            text = "${product.price} €",
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            color = MaterialTheme.colorScheme.onSurface
+            modifier = Modifier.weight(weights.price).padding(horizontal = 8.dp),
+            text = "€${product.price}", maxLines = 1,
+            style = MaterialTheme.typography.bodyMedium
         )
-        VerticalDivider(
-            thickness = 1.dp,
-            color = MaterialTheme.colorScheme.outline
-        )
+        // Stock
         Text(
-            modifier = Modifier.padding(horizontal = 8.dp)
-                .weight(stockWeight),
-            text = "${product.stock}",
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            color = MaterialTheme.colorScheme.onSurface
+            modifier = Modifier.weight(weights.stock).padding(horizontal = 8.dp),
+            text = "${product.stock}", maxLines = 1,
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (product.stock < 10) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
         )
-        VerticalDivider(
-            thickness = 1.dp,
-            color = MaterialTheme.colorScheme.outline
-        )
+        // Status
         Text(
-            modifier = Modifier.padding(horizontal = 8.dp)
-                .weight(activeWeight),
-            text = if (product.isActive) "Active" else "Inactive",
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            color = MaterialTheme.colorScheme.onSurface
+            modifier = Modifier.weight(weights.active).padding(horizontal = 8.dp),
+            text = if (product.isActive) "Active" else "Inactive", maxLines = 1,
+            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+            color = if (product.isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
-        VerticalDivider(
-            thickness = 1.dp,
-            color = MaterialTheme.colorScheme.outline
-        )
-        Column(modifier = Modifier.weight(actionsWeight)) {
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = { deleteProduct(product) }
-            ) {
-                Text(text = "Delete")
+        // Actions
+        Row(
+            modifier = Modifier.weight(weights.actions),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Edit button (less emphasis)
+            IconButton(onClick = { editProduct(product.id) }) {
+                Icon(Icons.Default.Edit, contentDescription = "Edit Product", tint = MaterialTheme.colorScheme.secondary)
             }
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-
-                onClick = { editProduct(product.id.toString()) }
-            ) {
-                Text(text = "Edit")
+            Spacer(Modifier.width(8.dp))
+            // Delete button (high emphasis, destructive color)
+            IconButton(onClick = { deleteProduct(product) }) {
+                Icon(Icons.Default.Delete, contentDescription = "Delete Product", tint = MaterialTheme.colorScheme.error)
             }
         }
     }

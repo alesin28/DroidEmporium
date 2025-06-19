@@ -36,22 +36,22 @@ class ProductListViewModel(
     }
 
     private val _sortColumn = MutableStateFlow(SortColumn.NAME)
-    //val sortColumn: StateFlow<SortColumn> = _sortColumn.asStateFlow()
+    val sortColumn: StateFlow<SortColumn> = _sortColumn.asStateFlow()
 
     private val _sortDirection = MutableStateFlow(SortDirection.ASCENDING)
-    //val sortDirection: StateFlow<SortDirection> = _sortDirection.asStateFlow()
+    val sortDirection: StateFlow<SortDirection> = _sortDirection.asStateFlow()
 
-    private val _minPriceFilter = MutableStateFlow<Double>(0.0)
-    val minPriceFilter: StateFlow<Double> = _minPriceFilter.asStateFlow()
+    private val _minPriceFilter = MutableStateFlow<Double?>(null)
+    val minPriceFilter: StateFlow<Double?> = _minPriceFilter.asStateFlow()
 
-    private val _maxPriceFilter = MutableStateFlow<Double>(999999.0)
-    val maxPriceFilter: StateFlow<Double> = _maxPriceFilter.asStateFlow()
+    private val _maxPriceFilter = MutableStateFlow<Double?>(null)
+    val maxPriceFilter: StateFlow<Double?> = _maxPriceFilter.asStateFlow()
 
-    private val _minStockFilter = MutableStateFlow<Int>(0)
-    val minStockFilter: StateFlow<Int> = _minStockFilter.asStateFlow()
+    private val _minStockFilter = MutableStateFlow<Int?>(null)
+    val minStockFilter: StateFlow<Int?> = _minStockFilter.asStateFlow()
 
-    private val _maxStockFilter = MutableStateFlow<Int>(999999)
-    val maxStockFilter: StateFlow<Int> = _maxStockFilter.asStateFlow()
+    private val _maxStockFilter = MutableStateFlow<Int?>(null)
+    val maxStockFilter: StateFlow<Int?> = _maxStockFilter.asStateFlow()
 
     private val _searchQuery = MutableStateFlow<String>("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -155,9 +155,13 @@ class ProductListViewModel(
             }
 
             sortedList.filter { product ->
-                val priceStockMatch =
-                    product.price >= filterState.minPrice && product.price <= filterState.maxPrice &&
-                            product.stock >= filterState.minStock && product.stock <= filterState.maxStock
+                val priceMatch =
+                    (filterState.minPrice == null || product.price >= filterState.minPrice) &&
+                            (filterState.maxPrice == null || product.price <= filterState.maxPrice)
+
+                val stockMatch =
+                    (filterState.minStock == null || product.stock >= filterState.minStock) &&
+                            (filterState.maxStock == null || product.stock <= filterState.maxStock)
 
                 val statusMatch = if (activeFilterState.isActive == activeFilterState.isInactive) {
                     true
@@ -170,7 +174,7 @@ class ProductListViewModel(
                 } else {
                     filterState.selectedCategories.contains(product.categoryId)
                 }
-                priceStockMatch && statusMatch && categoryMatch
+                priceMatch && stockMatch && statusMatch && categoryMatch
             }
         }.stateIn(
             scope = viewModelScope,
@@ -214,22 +218,19 @@ class ProductListViewModel(
         }
     }
 
-    fun updateMinPriceFilter(minPrice: Double) {
-        if (minPrice.isNaN()) return
+    fun updateMinPriceFilter(minPrice: Double?) {
         _minPriceFilter.value = minPrice
     }
 
-    fun updateMaxPriceFilter(maxPrice: Double) {
-        if (maxPrice.isNaN()) return
+    fun updateMaxPriceFilter(maxPrice: Double?) {
         _maxPriceFilter.value = maxPrice
     }
 
-    fun updateMinStockFilter(minStock: Int) {
-        if (minStock < 0) return
+    fun updateMinStockFilter(minStock: Int?) {
         _minStockFilter.value = minStock
     }
 
-    fun updateMaxStockFilter(maxStock: Int) {
+    fun updateMaxStockFilter(maxStock: Int?) {
         _maxStockFilter.value = maxStock
     }
 
@@ -252,6 +253,7 @@ class ProductListViewModel(
                 is Result.Success -> {
                     println("Successfully deleted product ${product.id}")
                 }
+
                 is Result.Failure -> {
                     println("Failed to delete product ${product.id}: ${result.exception.message}")
                 }
@@ -275,10 +277,10 @@ class ProductListViewModel(
     )
 
     data class FilterState(
-        val minPrice: Double,
-        val maxPrice: Double,
-        val minStock: Int,
-        val maxStock: Int,
+        val minPrice: Double?,
+        val maxPrice: Double?,
+        val minStock: Int?,
+        val maxStock: Int?,
         val selectedCategories: Set<String>
     )
 

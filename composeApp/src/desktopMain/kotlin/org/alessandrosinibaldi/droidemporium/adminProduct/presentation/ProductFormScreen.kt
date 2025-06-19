@@ -1,7 +1,9 @@
 package org.alessandrosinibaldi.droidemporium.adminProduct.presentation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -15,14 +17,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import org.alessandrosinibaldi.droidemporium.commonCategory.domain.Category
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.seiko.imageloader.rememberImagePainter
@@ -30,6 +38,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import java.io.File
 import javax.swing.JFileChooser
+
 
 @Composable
 fun ProductFormScreen(
@@ -109,181 +118,248 @@ fun ProductFormScreenContent(
     cloudinaryCloudName: String,
     isEditMode: Boolean
 ) {
-
     var categoryDropdownExpanded by remember { mutableStateOf(false) }
-    var imageDropdownExpanded by remember { mutableStateOf(false) }
 
     val selectedCategory = remember(selectedCategoryId, categories) {
         categories.find { it.id == selectedCategoryId }
     }
 
-    val fileChooser = JFileChooser().apply {
-        isMultiSelectionEnabled = true
-        fileFilter =
-            javax.swing.filechooser.FileNameExtensionFilter("Images", "jpg", "png", "gif", "jpeg")
+    val fileChooser = remember {
+        JFileChooser().apply {
+            isMultiSelectionEnabled = true
+            fileFilter =
+                javax.swing.filechooser.FileNameExtensionFilter("Images", "jpg", "png", "gif", "jpeg")
+        }
     }
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .widthIn(max = 800.dp),
+            contentPadding = PaddingValues(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             item {
-                OutlinedTextField(
-                    value = name,
-                    label = { Text("Name") },
-                    onValueChange = onNameChange
-                )
-            }
-            item {
-                OutlinedTextField(
-                    value = description,
-                    label = { Text("Description") },
-                    onValueChange = onDescriptionChange
-                )
-            }
-            item {
-                OutlinedTextField(
-                    value = price,
-                    label = { Text("Price") },
-                    onValueChange = onPriceChange
-                )
-            }
-            item {
-                OutlinedTextField(
-                    value = stock,
-                    label = { Text("Stock") },
-                    onValueChange = onStockChange
+                Text(
+                    text = if (isEditMode) "Edit Product" else "Add New Product",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 24.dp)
                 )
             }
 
             item {
-                ExposedDropdownMenuBox(
-                    expanded = categoryDropdownExpanded,
-                    onExpandedChange = { categoryDropdownExpanded = it } // Updated here
-                ) {
+                FormSection(title = "Core Details") {
                     OutlinedTextField(
-                        modifier = Modifier.menuAnchor(
-                            type = MenuAnchorType.PrimaryNotEditable,
-                            enabled = true
-                        ),
-                        value = selectedCategory?.name ?: "Select Category",
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Category") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryDropdownExpanded) }
+                        value = name,
+                        label = { Text("Product Name") },
+                        onValueChange = onNameChange,
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    ExposedDropdownMenu(
-                        expanded = categoryDropdownExpanded,
-                        onDismissRequest = { categoryDropdownExpanded = false }
+                    OutlinedTextField(
+                        value = description,
+                        label = { Text("Description") },
+                        onValueChange = onDescriptionChange,
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 3
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        categories.forEach { category ->
-                            category.id?.let { categoryId ->
-                                DropdownMenuItem(
-                                    text = { Text(category.name) },
-                                    onClick = {
-                                        onCategoryChange(categoryId)
-                                        categoryDropdownExpanded = false
-                                    }
+                        OutlinedTextField(
+                            value = price,
+                            label = { Text("Price") },
+                            onValueChange = onPriceChange,
+                            modifier = Modifier.weight(1f)
+                        )
+                        OutlinedTextField(
+                            value = stock,
+                            label = { Text("Stock") },
+                            onValueChange = onStockChange,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    ExposedDropdownMenuBox(
+                        expanded = categoryDropdownExpanded,
+                        onExpandedChange = { categoryDropdownExpanded = !it }
+                    ) {
+                        OutlinedTextField(
+                            modifier = Modifier.menuAnchor().fillMaxWidth(),
+                            value = selectedCategory?.name ?: "Select Category",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Category") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryDropdownExpanded) }
+                        )
+                        ExposedDropdownMenu(
+                            expanded = categoryDropdownExpanded,
+                            onDismissRequest = { categoryDropdownExpanded = false }
+                        ) {
+                            categories.forEach { category ->
+                                category.id?.let { categoryId ->
+                                    DropdownMenuItem(
+                                        text = { Text(category.name) },
+                                        onClick = {
+                                            onCategoryChange(categoryId)
+                                            categoryDropdownExpanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Checkbox(checked = isActive, onCheckedChange = onStatusChange)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Product is Active", style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+            }
+
+            item {
+                FormSection(title = "Manage Images") {
+                    if (isEditMode && existingImageIds.isNotEmpty()) {
+                        Text("Current Images", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            items(existingImageIds.size) { index ->
+                                val imageId = existingImageIds[index]
+                                ImageCard(
+                                    imageId = imageId,
+                                    cloudinaryCloudName = cloudinaryCloudName,
+                                    isDefault = imageId == defaultImageId,
+                                    onClick = { onDefaultImageIdChange(imageId) }
                                 )
                             }
                         }
                     }
-                }
-            }
 
-            item {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Active")
-                    Checkbox(checked = isActive, onCheckedChange = onStatusChange)
-                }
-            }
-
-            item {
-                Button(onClick = {
-                    val result = fileChooser.showOpenDialog(null)
-                    if (result == JFileChooser.APPROVE_OPTION) {
-                        onLocalFilesSelected(fileChooser.selectedFiles.toList())
-                    }
-                }) {
-                    Text("Select Images to Upload")
-                }
-            }
-
-            if (selectedLocalFiles.isNotEmpty()) {
-                item { Text("New files to upload:", style = MaterialTheme.typography.titleMedium) }
-                items(selectedLocalFiles.size) { index ->
-                    Text("- ${selectedLocalFiles[index].name}")
-                }
-            }
-
-            if (isEditMode && existingImageIds.isNotEmpty()) {
-                item { Text("Current Images:", style = MaterialTheme.typography.titleMedium) }
-                item {
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        items(existingImageIds.size) { index ->
-                            val imageId = existingImageIds[index]
-                            val imageUrl =
-                                "https://res.cloudinary.com/$cloudinaryCloudName/image/upload/w_100,h_100,c_fill/$imageId"
-                            Image(
-                                painter = rememberImagePainter(imageUrl),
-                                contentDescription = imageId,
-                                modifier = Modifier.size(100.dp).background(Color.Gray)
-                            )
-                        }
-                    }
-                }
-
-                item {
-                    ExposedDropdownMenuBox(
-                        expanded = imageDropdownExpanded,
-                        onExpandedChange = { imageDropdownExpanded = it } // Updated here too
+                    Spacer(Modifier.height(16.dp))
+                    Button(
+                        onClick = {
+                            val result = fileChooser.showOpenDialog(null)
+                            if (result == JFileChooser.APPROVE_OPTION) {
+                                onLocalFilesSelected(fileChooser.selectedFiles.toList())
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        OutlinedTextField(
-                            modifier = Modifier.menuAnchor(
-                                type = MenuAnchorType.PrimaryNotEditable,
-                                enabled = true
-                            ),
-                            value = defaultImageId,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text("Default Image") },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = imageDropdownExpanded) }
-                        )
-                        ExposedDropdownMenu(
-                            expanded = imageDropdownExpanded,
-                            onDismissRequest = { imageDropdownExpanded = false }
-                        ) {
-                            existingImageIds.forEach { imageId ->
-                                DropdownMenuItem(text = { Text(imageId) }, onClick = {
-                                    onDefaultImageIdChange(imageId)
-                                    imageDropdownExpanded = false
-                                })
+                        Icon(Icons.Default.Upload, contentDescription = "Upload", modifier = Modifier.padding(end = 8.dp))
+                        Text("Select New Images to Upload")
+                    }
+
+                    if (selectedLocalFiles.isNotEmpty()) {
+                        Column(modifier = Modifier.padding(top = 12.dp, start = 8.dp, end = 8.dp)) {
+                            Text("Staged for upload:", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            selectedLocalFiles.forEach { file ->
+                                Text("• ${file.name}", style = MaterialTheme.typography.bodySmall)
                             }
                         }
                     }
                 }
             }
 
+
             item {
-                Button(onClick = onSaveProduct, enabled = !isSaving && !isLoading) {
-                    Text(if (isEditMode) "Update Product" else "Add Product")
-                }
-            }
-            item {
-                Button(onClick = onNavigateBack) {
-                    Text("Cancel")
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedButton(onClick = onNavigateBack, enabled = !isSaving) {
+                        Text("Cancel")
+                    }
+                    Spacer(Modifier.width(16.dp))
+                    Button(onClick = onSaveProduct, enabled = !isSaving && !isLoading) {
+                        Text(if (isEditMode) "Update Product" else "Add Product")
+                    }
                 }
             }
         }
 
-        if (isLoading) {
-            CircularProgressIndicator()
+        if (isLoading || isSaving) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f))
+            ) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
         }
     }
 }
 
+
+@Composable
+private fun FormSection(
+    title: String,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Column(modifier = modifier.padding(vertical = 8.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.medium)
+                .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.medium)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            content()
+        }
+    }
+}
+
+@Composable
+private fun ImageCard(
+    imageId: String,
+    cloudinaryCloudName: String,
+    isDefault: Boolean,
+    onClick: () -> Unit
+) {
+    val imageUrl = "https://res.cloudinary.com/$cloudinaryCloudName/image/upload/w_150,h_150,c_fill/$imageId"
+    val borderColor = if (isDefault) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+
+    Card(
+        onClick = onClick,
+        modifier = Modifier.size(150.dp),
+        border = BorderStroke(if (isDefault) 3.dp else 1.dp, borderColor),
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Image(
+                painter = rememberImagePainter(imageUrl),
+                contentDescription = imageId,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+            if (isDefault) {
+                Icon(
+                    imageVector = Icons.Filled.CheckCircle,
+                    contentDescription = "Default Image",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(8.dp)
+                        .background(MaterialTheme.colorScheme.surface, CircleShape)
+                )
+            }
+        }
+    }
+}

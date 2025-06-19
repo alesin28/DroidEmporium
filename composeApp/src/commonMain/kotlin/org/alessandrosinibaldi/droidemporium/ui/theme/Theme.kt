@@ -14,7 +14,11 @@ private val LightColorScheme = lightColorScheme(
     surface = SurfaceWhite,
     onSurface = PrimaryText,
     surfaceVariant = TableHeaderGray,
-    outline = DividerGray
+    outline = DividerGray,
+    error = FailureRed,
+    onError = TextOnElement,
+    primaryContainer = LightBlueContainer,
+    onPrimaryContainer = AdminBlue,
 )
 
 @Composable

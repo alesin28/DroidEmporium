@@ -59,6 +59,7 @@ kotlin {
             implementation(libs.ktor.client.contentnegotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.ktor.client.logging)
+            implementation(compose.materialIconsExtended)
 
         }
         desktopMain.dependencies {
