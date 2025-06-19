@@ -1,35 +1,31 @@
 package org.alessandrosinibaldi.droidemporium.adminClient.presentation
 
-
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.lazy.items
-
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.*
-import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import org.alessandrosinibaldi.droidemporium.adminClient.components.ClientItem
-import org.alessandrosinibaldi.droidemporium.commonClient.domain.Client
 import org.alessandrosinibaldi.droidemporium.adminClient.presentation.ClientListViewModel.SortColumn
+import org.alessandrosinibaldi.droidemporium.adminClient.presentation.ClientListViewModel.SortDirection
+import org.alessandrosinibaldi.droidemporium.commonClient.domain.Client
+import org.alessandrosinibaldi.droidemporium.core.components.MenuReturnButton
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -37,220 +33,301 @@ fun ClientListScreen(
     viewModel: ClientListViewModel = koinViewModel(),
     navController: NavHostController
 ) {
-
     val clients by viewModel.clients.collectAsState()
+    val query by viewModel.searchQuery.collectAsState()
     val active by viewModel.isActiveFilter.collectAsState()
     val inactive by viewModel.isInactiveFilter.collectAsState()
-    val query by viewModel.searchQuery.collectAsState()
+    val sortColumn by viewModel.sortColumn.collectAsState()
+    val sortDirection by viewModel.sortDirection.collectAsState()
 
-    clientScreenContent(
+    val onNavigateBack: () -> Unit = {
+        navController.popBackStack()
+    }
+
+    clientListScreenContent(
         clients = clients,
+        query = query,
         active = active,
         inactive = inactive,
-        query = query,
+        sortColumn = sortColumn,
+        sortDirection = sortDirection,
+        onClientSearch = viewModel::updateQuery,
         onSortClick = viewModel::updateSort,
         onActiveFilterChange = viewModel::updateActiveFilter,
         onInactiveFilterChange = viewModel::updateInactiveFilter,
-        onClientSearch = viewModel::updateQuery
+        onNavigateBack = onNavigateBack
     )
 }
 
 @Composable
-fun clientScreenContent(
+fun clientListScreenContent(
     clients: List<Client>,
+    query: String,
     active: Boolean,
     inactive: Boolean,
-    query: String,
+    sortColumn: SortColumn,
+    sortDirection: SortDirection,
+    onClientSearch: (String) -> Unit,
     onSortClick: (SortColumn) -> Unit,
     onActiveFilterChange: (Boolean) -> Unit,
     onInactiveFilterChange: (Boolean) -> Unit,
-    onClientSearch: (String) -> Unit
+    onNavigateBack: () -> Unit
 ) {
-    val nameWeight = 1f
-    val emailWeight = 2f
-    val phoneWeight = 2f
-    val activeWeight = 1f
+    val nameWeight = 2f
+    val emailWeight = 2.5f
+    val phoneWeight = 1.5f
+    val statusWeight = 1f
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color(0xFFADD8E6)
-    ) {
-        Box(
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(clients) {
+        listState.scrollToItem(index = 0)
+    }
+
+    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        Row(
             modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Column {
+            MenuReturnButton(onNavigateBack = onNavigateBack)
+            Text(
+                "Clients",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(Modifier.weight(1f))
+            ClientSearchBar(
+                query = query,
+                onQueryChange = onClientSearch,
+                modifier = Modifier.weight(1.5f)
+            )
+        }
 
-                Row {
-                    ClientSearchBar(
-                        query = query,
-                        onProductSearch = onClientSearch
-                    )
-                }
+        Row(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+            Column(modifier = Modifier.weight(2.5f)) {
+                ClientTableHeader(
+                    weights = ClientTableWeights(
+                        nameWeight,
+                        emailWeight,
+                        phoneWeight,
+                        statusWeight
+                    ),
+                    sortColumn = sortColumn,
+                    sortDirection = sortDirection,
+                    onSortClick = onSortClick
+                )
+                HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
 
-                Row(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .weight(3f)
-
+                if (clients.isNotEmpty()) {
+                    LazyColumn(
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surface),
+                        state = listState
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(color = Color.LightGray)
-                                .padding(8.dp)
-                                .height(IntrinsicSize.Min)
-                        ) {
-                            TableHeader(
-                                text = "Display Name",
-                                weight = nameWeight,
-                                isSortable = true,
-                                onClick = { onSortClick(SortColumn.NAME) }
-
+                        items(clients, key = { it.id }) { client ->
+                            ClientItemRow(
+                                client = client,
+                                weights = ClientTableWeights(
+                                    nameWeight,
+                                    emailWeight,
+                                    phoneWeight,
+                                    statusWeight
+                                )
                             )
-                            VerticalDivider(
+                            HorizontalDivider(
                                 thickness = 1.dp,
-                                color = MaterialTheme.colorScheme.secondary
+                                color = MaterialTheme.colorScheme.outline
                             )
-                            TableHeader(
-                                text = "Email",
-                                weight = emailWeight,
-                                isSortable = false
-                            )
-                            VerticalDivider(
-                                thickness = 1.dp,
-                                color = MaterialTheme.colorScheme.secondary
-                            )
-                            TableHeader(
-                                text = "Phone",
-                                weight = phoneWeight,
-                                isSortable = false
-                            )
-                            VerticalDivider(
-                                thickness = 1.dp,
-                                color = MaterialTheme.colorScheme.secondary
-                            )
-                            TableHeader(
-                                text = "Status",
-                                weight = activeWeight,
-                                isSortable = false
-                            )
-                            VerticalDivider(
-                                thickness = 1.dp,
-                                color = MaterialTheme.colorScheme.secondary
-                            )
-                        }
-                        HorizontalDivider(thickness = 1.dp)
-                        if (!clients.isEmpty()) {
-                            LazyColumn(
-                                modifier = Modifier.background(color = MaterialTheme.colorScheme.surfaceVariant)
-                            ) {
-                                items(clients) { client ->
-
-                                    ClientItem(
-                                        client = client
-                                    )
-                                    HorizontalDivider(thickness = 1.dp)
-                                }
-                            }
-
-                        } else {
-                            Text("No Clients available")
                         }
                     }
-                    Column(
-                        modifier = Modifier.weight(1f)
+                } else {
+                    Box(
+                        modifier = Modifier.fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surface),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "Filters",
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                        Row {
-                            Text("Show Active Clients")
-                            Checkbox(
-                                checked = active,
-                                onCheckedChange = { newState ->
-                                    if (!active && inactive || (active && inactive)) {
-                                        onActiveFilterChange(newState)
-                                    }
-                                }
-                            )
-                        }
-                        Row {
-                            Text("Show Inactive Clients")
-                            Checkbox(
-                                checked = inactive,
-                                onCheckedChange = { newState ->
-                                    if (!inactive && active || active) {
-                                        onInactiveFilterChange(newState)
-                                    }
-                                }
-                            )
-                        }
-
-                        //LazyColumn {
-                        //    items(categories) {category ->
-                        //        Text(text = category.name)
-
-                        //    }
-                        //}
-
-
+                        Text("No clients found.", style = MaterialTheme.typography.bodyLarge)
                     }
                 }
             }
 
+            Spacer(Modifier.width(24.dp))
+
+            Surface(
+                modifier = Modifier.weight(1f),
+                shape = MaterialTheme.shapes.medium,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text("Filters", style = MaterialTheme.typography.titleLarge)
+                    Column {
+                        Text("Status", style = MaterialTheme.typography.titleSmall)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.clickable { onActiveFilterChange(!active) }) {
+                            Checkbox(checked = active, onCheckedChange = onActiveFilterChange)
+                            Text("Active")
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.clickable { onInactiveFilterChange(!inactive) }) {
+                            Checkbox(checked = inactive, onCheckedChange = onInactiveFilterChange)
+                            Text("Inactive")
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
 
-@Composable()
-fun ClientSearchBar(onProductSearch: (String) -> Unit, query: String) {
-    var clientQuery by remember { mutableStateOf(query) }
+private data class ClientTableWeights(
+    val name: Float,
+    val email: Float,
+    val phone: Float,
+    val status: Float
+)
 
-    OutlinedTextField(
-        value = clientQuery,
-        onValueChange = { newQuery ->
-            clientQuery = newQuery
-
-            onProductSearch(clientQuery)
-        },
-        label = { Text("Search") },
-        modifier = Modifier.padding(vertical = 4.dp, horizontal = 50.dp)
+@Composable
+private fun ClientTableHeader(
+    weights: ClientTableWeights,
+    sortColumn: SortColumn,
+    sortDirection: SortDirection,
+    onSortClick: (SortColumn) -> Unit
+) {
+    Row(
+        modifier = Modifier
             .fillMaxWidth()
-            .height(IntrinsicSize.Min)
+            .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+            .background(color = MaterialTheme.colorScheme.surfaceVariant)
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        HeaderCell(
+            "Display Name",
+            weights.name,
+            true,
+            sortColumn == SortColumn.NAME,
+            sortDirection
+        ) { onSortClick(SortColumn.NAME) }
+        HeaderCell("Email", weights.email, false)
+        HeaderCell("Phone", weights.phone, false)
+        HeaderCell("Status", weights.status, false, alignment = TextAlign.Center)
+    }
+}
 
+@Composable
+private fun ClientItemRow(client: Client, weights: ClientTableWeights) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        DataCell(modifier = Modifier.weight(weights.name)) {
+            Text(
+                client.displayName,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+        DataCell(modifier = Modifier.weight(weights.email)) {
+            Text(client.email, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+        DataCell(modifier = Modifier.weight(weights.phone)) {
+            Text(client.phoneNumber ?: "N/A", maxLines = 1)
+        }
+        DataCell(modifier = Modifier.weight(weights.status), alignment = Alignment.Center) {
+            Text(
+                text = if (client.isActive) "Active" else "Inactive",
+                color = if (client.isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(
+                    alpha = 0.6f
+                ),
+                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
+            )
+        }
+    }
+}
 
+@Composable
+private fun ClientSearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        label = { Text("Search by Name or Email...") },
+        leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
+        modifier = modifier.height(IntrinsicSize.Min),
+        singleLine = true,
+        shape = MaterialTheme.shapes.extraLarge
     )
 }
 
 @Composable
-fun RowScope.TableHeader(
+private fun RowScope.HeaderCell(
     text: String,
     weight: Float,
     isSortable: Boolean,
+    isSorted: Boolean = false,
+    sortDirection: SortDirection = SortDirection.ASCENDING,
+    alignment: TextAlign = TextAlign.Start,
     onClick: () -> Unit = {}
 ) {
-    Row(
-        modifier = Modifier
-            .weight(weight)
-            .then(if (isSortable) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
+    Box(
+        modifier = Modifier.weight(weight).padding(horizontal = 8.dp),
+        contentAlignment = when (alignment) {
+            TextAlign.Center -> Alignment.Center
+            TextAlign.End -> Alignment.CenterEnd
+            else -> Alignment.CenterStart
+        }
     ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.Center,
-        )
-
+        Row(
+            modifier = Modifier.then(
+                if (isSortable) Modifier.clip(MaterialTheme.shapes.small)
+                    .clickable(onClick = onClick) else Modifier
+            ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = if (alignment == TextAlign.Center) Arrangement.Center else Arrangement.Start
+        ) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                textAlign = alignment,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            if (isSortable && isSorted) {
+                val sortIcon =
+                    if (sortDirection == SortDirection.ASCENDING) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward
+                Icon(
+                    imageVector = sortIcon,
+                    contentDescription = "Sort Direction",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(16.dp).padding(start = 4.dp)
+                )
+            }
+        }
     }
+}
 
-
+@Composable
+private fun RowScope.DataCell(
+    modifier: Modifier = Modifier,
+    alignment: Alignment = Alignment.CenterStart,
+    content: @Composable () -> Unit
+) {
+    Box(
+        modifier = modifier.padding(horizontal = 8.dp),
+        contentAlignment = alignment
+    ) {
+        content()
+    }
 }

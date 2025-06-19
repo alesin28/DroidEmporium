@@ -33,10 +33,10 @@ class ClientListViewModel(
     }
 
     private val _sortColumn = MutableStateFlow(SortColumn.NAME)
-    //val sortColumn: StateFlow<SortColumn> = _sortColumn.asStateFlow()
+    val sortColumn: StateFlow<SortColumn> = _sortColumn.asStateFlow()
 
     private val _sortDirection = MutableStateFlow(SortDirection.ASCENDING)
-    //val sortDirection: StateFlow<SortDirection> = _sortDirection.asStateFlow()
+    val sortDirection: StateFlow<SortDirection> = _sortDirection.asStateFlow()
 
 
     private val _searchQuery = MutableStateFlow<String>("")

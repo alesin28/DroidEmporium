@@ -38,6 +38,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import java.io.File
 import javax.swing.JFileChooser
+import javax.swing.filechooser.FileNameExtensionFilter
 
 
 @Composable
@@ -127,8 +128,7 @@ fun ProductFormScreenContent(
     val fileChooser = remember {
         JFileChooser().apply {
             isMultiSelectionEnabled = true
-            fileFilter =
-                javax.swing.filechooser.FileNameExtensionFilter("Images", "jpg", "png", "gif", "jpeg")
+            fileFilter = FileNameExtensionFilter("Images", "jpg", "png", "gif", "jpeg")
         }
     }
 
@@ -228,7 +228,11 @@ fun ProductFormScreenContent(
             item {
                 FormSection(title = "Manage Images") {
                     if (isEditMode && existingImageIds.isNotEmpty()) {
-                        Text("Current Images", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
+                        Text(
+                            "Current Images",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(16.dp),
                             modifier = Modifier.fillMaxWidth()
@@ -255,13 +259,21 @@ fun ProductFormScreenContent(
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Icon(Icons.Default.Upload, contentDescription = "Upload", modifier = Modifier.padding(end = 8.dp))
+                        Icon(
+                            Icons.Default.Upload,
+                            contentDescription = "Upload",
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
                         Text("Select New Images to Upload")
                     }
 
                     if (selectedLocalFiles.isNotEmpty()) {
                         Column(modifier = Modifier.padding(top = 12.dp, start = 8.dp, end = 8.dp)) {
-                            Text("Staged for upload:", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(
+                                "Staged for upload:",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                             selectedLocalFiles.forEach { file ->
                                 Text("• ${file.name}", style = MaterialTheme.typography.bodySmall)
                             }
@@ -333,8 +345,10 @@ private fun ImageCard(
     isDefault: Boolean,
     onClick: () -> Unit
 ) {
-    val imageUrl = "https://res.cloudinary.com/$cloudinaryCloudName/image/upload/w_150,h_150,c_fill/$imageId"
-    val borderColor = if (isDefault) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+    val imageUrl =
+        "https://res.cloudinary.com/$cloudinaryCloudName/image/upload/w_150,h_150,c_fill/$imageId"
+    val borderColor =
+        if (isDefault) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
 
     Card(
         onClick = onClick,
