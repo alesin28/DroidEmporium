@@ -33,9 +33,7 @@ class AdminFirestoreOrderRepository : AdminOrderRepository {
                             val domainLines = linesSnapshot.documents.map { lineDoc ->
                                 lineDoc.data<OrderLineDto>().toDomain(id = lineDoc.id)
                             }
-
                             val orderDto = orderDoc.data<OrderDto>()
-
                             orderDto.toDomain(id = orderDoc.id, lines = domainLines)
                         }
                     }
@@ -44,12 +42,15 @@ class AdminFirestoreOrderRepository : AdminOrderRepository {
                 val filteredList = if (query.isBlank()) {
                     allOrders
                 } else {
-                    val lowerCaseQuery = query.lowercase()
+                    val lowerCaseQuery = query.lowercase().trim()
                     allOrders.filter { order ->
-                        order.clientId.lowercase().contains(lowerCaseQuery)
+                        order.id.lowercase().contains(lowerCaseQuery) ||
+                                order.clientName.lowercase().contains(lowerCaseQuery) ||
+                                order.lines.any { orderLine ->
+                                    orderLine.productName.lowercase().contains(lowerCaseQuery)
+                                }
                     }
                 }
-
                 emit(Result.Success(filteredList))
             }
         } catch (e: Exception) {

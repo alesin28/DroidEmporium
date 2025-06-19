@@ -10,7 +10,8 @@ import org.alessandrosinibaldi.droidemporium.commonOrder.domain.OrderLine
 data class OrderDto(
     val clientId: String = "",
     val orderDate: Timestamp? = null,
-    val totalAmount: Double = 0.0
+    val totalAmount: Double = 0.0,
+    val clientName: String,
 )
 
 fun OrderDto.toDomain(id: String, lines: List<OrderLine>): Order {
@@ -19,6 +20,7 @@ fun OrderDto.toDomain(id: String, lines: List<OrderLine>): Order {
         clientId = this.clientId,
         orderDate = this.orderDate?.toInstant() ?: Instant.DISTANT_PAST,
         totalAmount = this.totalAmount,
+        clientName = this.clientName,
         lines = lines
     )
 }

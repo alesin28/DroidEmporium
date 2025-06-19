@@ -45,6 +45,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import org.alessandrosinibaldi.droidemporium.adminProduct.components.ProductItemWeights
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductListViewModel.SortDirection
+import androidx.compose.foundation.lazy.rememberLazyListState
+
 
 @Composable
 fun ProductScreen(
@@ -68,8 +70,10 @@ fun ProductScreen(
 
 
     val onNavigateToAddProduct: () -> Unit = { navController.navigate(Route.ProductAdd) }
-    val onNavigateToEditProduct: (String) -> Unit = { productId -> navController.navigate(Route.ProductEdit(productId = productId)) }
-    val onNavigateToProductDetail: (String) -> Unit = { productId -> navController.navigate(Route.ProductDetail(productId = productId)) }
+    val onNavigateToEditProduct: (String) -> Unit =
+        { productId -> navController.navigate(Route.ProductEdit(productId = productId)) }
+    val onNavigateToProductDetail: (String) -> Unit =
+        { productId -> navController.navigate(Route.ProductDetail(productId = productId)) }
 
     productScreenContent(
         products = products,
@@ -136,10 +140,17 @@ fun productScreenContent(
     val activeWeight = 1f
     val actionsWeight = 1.5f
 
+    val listState = rememberLazyListState()
+
+
     var minPriceInput by remember { mutableStateOf(minPrice?.toString() ?: "") }
     var maxPriceInput by remember { mutableStateOf(maxPrice?.toString() ?: "") }
     var minStockInput by remember { mutableStateOf(minStock?.toString() ?: "") }
     var maxStockInput by remember { mutableStateOf(maxStock?.toString() ?: "") }
+
+    LaunchedEffect(products) {
+        listState.scrollToItem(index = 0)
+    }
 
     LaunchedEffect(minPrice) { minPriceInput = minPrice?.toString() ?: "" }
     LaunchedEffect(maxPrice) { maxPriceInput = maxPrice?.toString() ?: "" }
@@ -168,7 +179,11 @@ fun productScreenContent(
                 modifier = Modifier.weight(1f)
             )
             Button(onClick = onNavigateToAddProduct) {
-                Icon(Icons.Default.Add, contentDescription = "Add Product", modifier = Modifier.padding(end = 8.dp))
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = "Add Product",
+                    modifier = Modifier.padding(end = 8.dp)
+                )
                 Text("Add Product")
             }
         }
@@ -183,18 +198,38 @@ fun productScreenContent(
                         .padding(horizontal = 8.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    TableHeader("Name", nameWeight, true, sortColumn == SortColumn.NAME, sortDirection) { onSortClick(SortColumn.NAME) }
+                    TableHeader(
+                        "Name",
+                        nameWeight,
+                        true,
+                        sortColumn == SortColumn.NAME,
+                        sortDirection
+                    ) { onSortClick(SortColumn.NAME) }
                     TableHeader("Category", categoryWeight, false)
-                    TableHeader("Price", priceWeight, true, sortColumn == SortColumn.PRICE, sortDirection) { onSortClick(SortColumn.PRICE) }
-                    TableHeader("Stock", stockWeight, true, sortColumn == SortColumn.STOCK, sortDirection) { onSortClick(SortColumn.STOCK) }
+                    TableHeader(
+                        "Price",
+                        priceWeight,
+                        true,
+                        sortColumn == SortColumn.PRICE,
+                        sortDirection
+                    ) { onSortClick(SortColumn.PRICE) }
+                    TableHeader(
+                        "Stock",
+                        stockWeight,
+                        true,
+                        sortColumn == SortColumn.STOCK,
+                        sortDirection
+                    ) { onSortClick(SortColumn.STOCK) }
                     TableHeader("Status", activeWeight, false)
                     TableHeader("Actions", actionsWeight, false, alignment = TextAlign.Center)
                 }
                 HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
 
-                // Table Body
                 if (products.isNotEmpty()) {
-                    LazyColumn(modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
+                    LazyColumn(
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surface),
+                        state = listState
+                    ) {
                         items(products, key = { it.id }) { product ->
                             val category = categories.find { it.id == product.categoryId }
                             if (category != null) {
@@ -204,14 +239,28 @@ fun productScreenContent(
                                     deleteProduct = deleteProduct,
                                     editProduct = onNavigateToEditProduct,
                                     onNavigateToProductDetail = onNavigateToProductDetail,
-                                    weights = ProductItemWeights(nameWeight, categoryWeight, priceWeight, stockWeight, activeWeight, actionsWeight)
+                                    weights = ProductItemWeights(
+                                        nameWeight,
+                                        categoryWeight,
+                                        priceWeight,
+                                        stockWeight,
+                                        activeWeight,
+                                        actionsWeight
+                                    )
                                 )
-                                HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
+                                HorizontalDivider(
+                                    thickness = 1.dp,
+                                    color = MaterialTheme.colorScheme.outline
+                                )
                             }
                         }
                     }
                 } else {
-                    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface), contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier.fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surface),
+                        contentAlignment = Alignment.Center
+                    ) {
                         Text("No products found.", style = MaterialTheme.typography.bodyLarge)
                     }
                 }
@@ -230,7 +279,11 @@ fun productScreenContent(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     item {
-                        Text("Filters", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(bottom = 8.dp))
+                        Text(
+                            "Filters",
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
                     }
 
                     item {
@@ -303,10 +356,13 @@ fun productScreenContent(
                         val categoryId = category.id
                         val isSelected = selectedCategoryIds.contains(categoryId)
                         Row(
-                            modifier = Modifier.fillMaxWidth().clickable { onCategorySelectionChange(categoryId, !isSelected) },
+                            modifier = Modifier.fillMaxWidth()
+                                .clickable { onCategorySelectionChange(categoryId, !isSelected) },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Checkbox(checked = isSelected, onCheckedChange = { onCategorySelectionChange(categoryId, it) })
+                            Checkbox(
+                                checked = isSelected,
+                                onCheckedChange = { onCategorySelectionChange(categoryId, it) })
                             Text(text = category.name, style = MaterialTheme.typography.bodyMedium)
                         }
                     }
@@ -348,7 +404,10 @@ fun RowScope.TableHeader(
     Row(
         modifier = Modifier
             .weight(weight)
-            .then(if (isSortable) Modifier.clip(MaterialTheme.shapes.small).clickable(onClick = onClick) else Modifier)
+            .then(
+                if (isSortable) Modifier.clip(MaterialTheme.shapes.small)
+                    .clickable(onClick = onClick) else Modifier
+            )
             .padding(horizontal = 4.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = if (alignment == TextAlign.Center) Arrangement.Center else Arrangement.Start

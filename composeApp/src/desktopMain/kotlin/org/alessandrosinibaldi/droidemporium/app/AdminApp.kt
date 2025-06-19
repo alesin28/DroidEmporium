@@ -57,7 +57,8 @@ fun AdminApp() {
         }
 
         composable<Route.CategoryList> {
-            CategoryListScreen()
+            CategoryListScreen(navController = navController)
+
         }
 
         composable<Route.ClientList> {
