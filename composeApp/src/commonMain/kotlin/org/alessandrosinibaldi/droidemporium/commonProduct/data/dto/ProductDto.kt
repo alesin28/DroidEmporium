@@ -11,7 +11,9 @@ data class ProductDto(
     val price: Double = 0.0,
     val stock: Int = 0,
     val isActive: Boolean = true,
-    val categoryId: String = ""
+    val categoryId: String = "",
+    val imageIds: List<String> = emptyList(),
+    val defaultImageId: String = ""
 )
 
 fun ProductDto.toDomain(id: String): Product {
@@ -22,6 +24,8 @@ fun ProductDto.toDomain(id: String): Product {
         price = this.price,
         stock = this.stock,
         isActive = this.isActive,
-        categoryId = this.categoryId
+        categoryId = this.categoryId,
+        imageIds = this.imageIds,
+        defaultImageId = this.defaultImageId
     )
 }

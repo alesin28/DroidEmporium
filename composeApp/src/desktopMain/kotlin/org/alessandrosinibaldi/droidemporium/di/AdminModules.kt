@@ -12,6 +12,7 @@ import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductDe
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductFormViewModel
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductListViewModel
 import org.alessandrosinibaldi.droidemporium.adminOrder.presentation.OrderListViewModel
+import org.alessandrosinibaldi.droidemporium.adminProduct.data.CloudinaryUploader
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.AdminProductRepository
 import org.alessandrosinibaldi.droidemporium.commonCategory.domain.CategoryRepository
 import org.alessandrosinibaldi.droidemporium.commonOrder.domain.OrderRepository
@@ -29,6 +30,9 @@ val desktopAppModule = module {
     singleOf(::FirestoreCategoryRepository).bind<CategoryRepository>()
     singleOf(::FirestoreClientRepository).bind<AdminClientRepository>()
     singleOf(::FirestoreOrderRepository).bind<OrderRepository>()
+
+    single { CloudinaryUploader() }
+
 
     viewModelOf(::ClientListViewModel)
 
@@ -53,6 +57,7 @@ val desktopAppModule = module {
         ProductFormViewModel(
             adminProductRepository = get(),
             categoryRepository = get(),
+            cloudinaryUploader = get(),
             productId = params.getOrNull()
         )
     }

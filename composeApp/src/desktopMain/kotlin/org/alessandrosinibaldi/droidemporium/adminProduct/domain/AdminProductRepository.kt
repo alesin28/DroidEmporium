@@ -7,5 +7,14 @@ import org.alessandrosinibaldi.droidemporium.core.domain.Result
 interface AdminProductRepository : ProductRepository {
     suspend fun updateProduct(product: Product): Result<Unit>
     suspend fun deleteProduct(productId: String): Result<Unit>
-    suspend fun addProduct(name: String, description: String, price: Double, stock: Int, isActive: Boolean, categoryId: String): Result<Unit>
+    suspend fun addProduct(
+        name: String,
+        description: String,
+        price: Double,
+        stock: Int,
+        isActive: Boolean,
+        categoryId: String,
+        imageIds: List<String>,
+        defaultImageId: String
+    ): Result<Unit>
 }

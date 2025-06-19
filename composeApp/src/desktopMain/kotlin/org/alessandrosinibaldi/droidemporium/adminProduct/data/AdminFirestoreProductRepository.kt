@@ -11,10 +11,9 @@ import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
 
 
-class AdminFirestoreProductRepository : AdminProductRepository  {
+class AdminFirestoreProductRepository : AdminProductRepository {
     private val firestore = Firebase.firestore
     private val productsCollection = firestore.collection("products")
-
 
 
     override fun searchProducts(query: String): Flow<Result<List<Product>>> = flow {
@@ -63,7 +62,9 @@ class AdminFirestoreProductRepository : AdminProductRepository  {
                 price = product.price,
                 stock = product.stock,
                 isActive = product.isActive,
-                categoryId = product.categoryId
+                categoryId = product.categoryId,
+                imageIds = product.imageIds,
+                defaultImageId = product.defaultImageId
             )
 
             productsCollection.document(product.id).set(productDto)
@@ -94,7 +95,9 @@ class AdminFirestoreProductRepository : AdminProductRepository  {
         price: Double,
         stock: Int,
         isActive: Boolean,
-        categoryId: String
+        categoryId: String,
+        imageIds: List<String>,
+        defaultImageId: String
     ): Result<Unit> {
         return try {
             val productDto = ProductDto(
@@ -103,7 +106,9 @@ class AdminFirestoreProductRepository : AdminProductRepository  {
                 price = price,
                 stock = stock,
                 isActive = isActive,
-                categoryId = categoryId
+                categoryId = categoryId,
+                imageIds = imageIds,
+                defaultImageId = defaultImageId
             )
             val ref = productsCollection.add(productDto)
             println("Product added with ID: ${ref.id}")
