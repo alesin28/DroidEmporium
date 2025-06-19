@@ -46,7 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import org.alessandrosinibaldi.droidemporium.adminProduct.components.ProductItemWeights
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductListViewModel.SortDirection
 import androidx.compose.foundation.lazy.rememberLazyListState
-
+import org.alessandrosinibaldi.droidemporium.core.components.MenuReturnButton
 
 @Composable
 fun ProductScreen(
@@ -75,6 +75,10 @@ fun ProductScreen(
     val onNavigateToProductDetail: (String) -> Unit =
         { productId -> navController.navigate(Route.ProductDetail(productId = productId)) }
 
+    val onNavigateBack: () -> Unit = {
+        navController.popBackStack()
+    }
+
     productScreenContent(
         products = products,
         categories = categories,
@@ -100,7 +104,8 @@ fun ProductScreen(
         onCategorySelectionChange = viewModel::updateSelectedCategories,
         onProductSearch = viewModel::updateQuery,
         sortColumn = sortColumn,
-        sortDirection = sortDirection
+        sortDirection = sortDirection,
+        onNavigateBack = onNavigateBack
     )
 }
 
@@ -131,7 +136,8 @@ fun productScreenContent(
     onCategorySelectionChange: (String, Boolean) -> Unit,
     onProductSearch: (String) -> Unit,
     sortColumn: SortColumn,
-    sortDirection: SortDirection
+    sortDirection: SortDirection,
+    onNavigateBack: () -> Unit
 ) {
     val nameWeight = 3f
     val categoryWeight = 1.5f
@@ -167,6 +173,7 @@ fun productScreenContent(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            MenuReturnButton(onNavigateBack = onNavigateBack)
             Text(
                 "Products",
                 style = MaterialTheme.typography.headlineSmall,
