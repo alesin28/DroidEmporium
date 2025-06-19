@@ -71,7 +71,10 @@ fun AdminApp() {
 
         composable<Route.OrderDetail> { backStackEntry ->
             val orderId = backStackEntry.arguments?.getString("orderId")
-            OrderDetailScreen(orderId = orderId)
+            OrderDetailScreen(
+                orderId = orderId,
+                navController = navController
+                )
         }
 
     }

@@ -5,7 +5,7 @@ data class Address(
     val label: String,
     val street: String,
     val city: String,
-    val state: String,
+    val province: String,
     val postalCode: String,
     val country: String,
     val isDefault: Boolean = false

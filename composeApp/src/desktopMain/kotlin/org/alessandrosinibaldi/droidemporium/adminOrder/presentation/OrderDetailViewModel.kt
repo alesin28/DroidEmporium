@@ -3,19 +3,24 @@ package org.alessandrosinibaldi.droidemporium.adminOrder.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.alessandrosinibaldi.droidemporium.adminClient.domain.AdminClientRepository
+import org.alessandrosinibaldi.droidemporium.adminOrder.domain.AdminOrderRepository
 import org.alessandrosinibaldi.droidemporium.commonClient.domain.Client
 import org.alessandrosinibaldi.droidemporium.commonOrder.domain.Order
-import org.alessandrosinibaldi.droidemporium.commonOrder.domain.OrderRepository
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
 
 class OrderDetailViewModel(
-    private val orderRepository: OrderRepository,
+    private val adminOrderRepository: AdminOrderRepository,
     private val adminClientRepository: AdminClientRepository,
     private val orderId: String?
 ) : ViewModel() {
+
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     private val _order = MutableStateFlow<Order?>(null)
     val order = _order.asStateFlow()
 
@@ -25,13 +30,15 @@ class OrderDetailViewModel(
     init {
         if (orderId != null) {
             loadOrder(orderId)
+        } else {
+            _isLoading.value = false
         }
     }
 
     private fun loadOrder(id: String) {
         viewModelScope.launch {
 
-            val orderResult = orderRepository.getOrderById(id)
+            val orderResult = adminOrderRepository.getOrderById(id)
 
             val fetchedOrder = when (orderResult) {
                 is Result.Success -> orderResult.data
@@ -55,6 +62,8 @@ class OrderDetailViewModel(
             } else {
                 _client.value = null
             }
+            _isLoading.value = false
+
         }
     }
 }

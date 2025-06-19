@@ -18,7 +18,6 @@ import org.alessandrosinibaldi.droidemporium.adminProduct.domain.AdminProductRep
 import org.alessandrosinibaldi.droidemporium.adminReview.data.AdminFirestoreReviewRepository
 import org.alessandrosinibaldi.droidemporium.adminReview.domain.AdminReviewRepository
 import org.alessandrosinibaldi.droidemporium.commonCategory.domain.CategoryRepository
-import org.alessandrosinibaldi.droidemporium.commonOrder.domain.OrderRepository
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
@@ -77,7 +76,7 @@ val desktopAppModule = module {
 
     viewModel { params ->
         OrderDetailViewModel(
-            orderRepository = get(),
+            adminOrderRepository = get(),
             adminClientRepository = get(),
             orderId = params.getOrNull()
         )

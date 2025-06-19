@@ -8,7 +8,7 @@ data class AddressDto(
     val label: String = "",
     val street: String = "",
     val city: String = "",
-    val state: String = "",
+    val province: String = "",
     val postalCode: String = "",
     val country: String = "",
     val isDefault: Boolean = false
@@ -20,7 +20,7 @@ fun AddressDto.toDomain(id: String): Address {
         label = this.label,
         street = this.street,
         city = this.city,
-        state = this.state,
+        province = this.province,
         postalCode = this.postalCode,
         country = this.country,
         isDefault = this.isDefault
