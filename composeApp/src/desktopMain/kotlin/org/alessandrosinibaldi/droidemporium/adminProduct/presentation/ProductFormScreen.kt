@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -20,7 +21,6 @@ import androidx.compose.ui.Modifier
 import org.alessandrosinibaldi.droidemporium.commonCategory.domain.Category
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -92,7 +92,7 @@ fun ProductFormScreen(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ProductFormScreenContent(
     name: String,
@@ -191,7 +191,8 @@ fun ProductFormScreenContent(
                         onExpandedChange = { categoryDropdownExpanded = it }
                     ) {
                         OutlinedTextField(
-                            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
+                            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                                .fillMaxWidth(),
                             value = selectedCategory?.name ?: "Select Category",
                             onValueChange = {},
                             readOnly = true,
@@ -203,7 +204,7 @@ fun ProductFormScreenContent(
                             onDismissRequest = { categoryDropdownExpanded = false }
                         ) {
                             categories.forEach { category ->
-                                category.id?.let { categoryId ->
+                                category.id.let { categoryId ->
                                     DropdownMenuItem(
                                         text = { Text(category.name) },
                                         onClick = {
@@ -234,12 +235,12 @@ fun ProductFormScreenContent(
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
-                        LazyRow(
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            modifier = Modifier.fillMaxWidth()
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            items(existingImageIds.size) { index ->
-                                val imageId = existingImageIds[index]
+                            existingImageIds.forEach { imageId ->
                                 ImageCard(
                                     imageId = imageId,
                                     cloudinaryCloudName = cloudinaryCloudName,

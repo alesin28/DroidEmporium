@@ -5,10 +5,11 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -77,6 +78,7 @@ fun ProductDetailScreen(
     )
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ProductDetailScreenContent(
     product: Product?,
@@ -107,9 +109,8 @@ fun ProductDetailScreenContent(
         } else {
             var selectedTabIndex by remember { mutableStateOf(0) }
             val tabs = listOf("Reviews (${reviews.size})", "Orders (${orders.size})")
-
             var selectedImageId by remember(product.id) { mutableStateOf(product.defaultImageId) }
-
+            val horizontalScrollState = rememberScrollState()
 
             Column(modifier = Modifier.padding(24.dp)) {
                 Row(
@@ -130,10 +131,16 @@ fun ProductDetailScreenContent(
                 Spacer(Modifier.height(16.dp))
 
                 Row(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .horizontalScroll(horizontalScrollState),
                     horizontalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    LazyColumn(modifier = Modifier.weight(1f)) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .widthIn(min = 500.dp)
+                    ) {
                         item {
                             Text(
                                 product.name,
@@ -167,8 +174,12 @@ fun ProductDetailScreenContent(
                                 Spacer(Modifier.height(16.dp))
                             }
                             item {
-                                LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                    items(product.imageIds, key = { it }) { imageId ->
+                                FlowRow(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    product.imageIds.forEach { imageId ->
                                         ThumbnailImageCard(
                                             imageId = imageId,
                                             isSelected = imageId == selectedImageId,
@@ -195,7 +206,11 @@ fun ProductDetailScreenContent(
                         }
                     }
 
-                    Column(modifier = Modifier.weight(1.2f)) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1.2f)
+                            .widthIn(min = 450.dp)
+                    ) {
                         TabRow(selectedTabIndex = selectedTabIndex) {
                             tabs.forEachIndexed { index, title ->
                                 Tab(
