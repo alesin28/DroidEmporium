@@ -42,11 +42,6 @@ class ClientListViewModel(
     private val _searchQuery = MutableStateFlow<String>("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private val _isActiveFilter = MutableStateFlow<Boolean>(true)
-    val isActiveFilter: StateFlow<Boolean> = _isActiveFilter.asStateFlow()
-    private val _isInactiveFilter = MutableStateFlow<Boolean>(true)
-    val isInactiveFilter: StateFlow<Boolean> = _isInactiveFilter.asStateFlow()
-
     private val sortStateFlow: Flow<SortState> = combine(
         _sortColumn,
         _sortDirection,
@@ -56,17 +51,6 @@ class ClientListViewModel(
             sortDirection = sortDirection,
         )
     }
-
-    private val activeFilterStateFlow: Flow<ActiveFilterState> = combine(
-        _isActiveFilter,
-        _isInactiveFilter,
-    ) { isActiveFilter, isInactiveFilter ->
-        ActiveFilterState(
-            isActive = isActiveFilter,
-            isInactive = isInactiveFilter
-        )
-    }
-
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     val clients: StateFlow<List<Client>> = run {
@@ -88,10 +72,9 @@ class ClientListViewModel(
             }
 
         combine(
-            unwrappedClientsFlow, // <-- Use the clean flow here
+            unwrappedClientsFlow,
             sortStateFlow,
-            activeFilterStateFlow
-        ) { clientList, sortState, activeFilterState ->
+        ) { clientList, sortState -> // <-- a parameter was removed from here
             val sortedList = when (sortState.sortColumn) {
                 SortColumn.NAME -> {
                     if (sortState.sortDirection == SortDirection.ASCENDING) {
@@ -104,14 +87,7 @@ class ClientListViewModel(
                 SortColumn.NONE -> clientList
             }
 
-            sortedList.filter { client ->
-                val statusMatch = if (activeFilterState.isActive == activeFilterState.isInactive) {
-                    true
-                } else {
-                    client.isActive == activeFilterState.isActive
-                }
-                statusMatch
-            }
+            sortedList
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -138,22 +114,10 @@ class ClientListViewModel(
         _searchQuery.value = query
     }
 
-    fun updateActiveFilter(isActive: Boolean) {
-        _isActiveFilter.value = isActive
-    }
-
-    fun updateInactiveFilter(isInactive: Boolean) {
-        _isInactiveFilter.value = isInactive
-    }
-
 
     data class SortState(
         val sortColumn: SortColumn,
         val sortDirection: SortDirection
     )
 
-    data class ActiveFilterState(
-        val isActive: Boolean,
-        val isInactive: Boolean
-    )
 }

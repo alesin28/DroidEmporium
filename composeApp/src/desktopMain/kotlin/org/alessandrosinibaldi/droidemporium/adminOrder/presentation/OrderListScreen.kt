@@ -5,13 +5,17 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import kotlinx.datetime.Instant
 import kotlinx.datetime.toJavaInstant
 import org.alessandrosinibaldi.droidemporium.adminOrder.presentation.OrderListViewModel.SortColumn
 import org.alessandrosinibaldi.droidemporium.adminOrder.presentation.OrderListViewModel.SortDirection
@@ -34,7 +39,8 @@ import org.koin.compose.viewmodel.koinViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import androidx.compose.foundation.lazy.rememberLazyListState
+import java.util.concurrent.TimeUnit
+import androidx.compose.foundation.interaction.PressInteraction
 
 
 @Composable
@@ -50,6 +56,8 @@ fun orderListScreen(
     val maxTotalAmount by viewModel.maxTotalAmountFilter.collectAsState()
     val minTotalQuantity by viewModel.minTotalQuantityFilter.collectAsState()
     val maxTotalQuantity by viewModel.maxTotalQuantityFilter.collectAsState()
+    val startDate by viewModel.startDateFilter.collectAsState()
+    val endDate by viewModel.endDateFilter.collectAsState()
 
     val onNavigateToOrderDetail: (String) -> Unit = { orderId ->
         navController.navigate(Route.OrderDetail(orderId = orderId))
@@ -68,6 +76,8 @@ fun orderListScreen(
         maxTotalAmount = maxTotalAmount,
         minTotalQuantity = minTotalQuantity,
         maxTotalQuantity = maxTotalQuantity,
+        startDate = startDate,
+        endDate = endDate,
         onSearchQueryChange = viewModel::updateSearchQuery,
         onSortClick = viewModel::updateSort,
         onNavigateToOrderDetail = onNavigateToOrderDetail,
@@ -75,10 +85,13 @@ fun orderListScreen(
         onMaxTotalAmountChange = viewModel::updateMaxTotalAmountFilter,
         onMinTotalQuantityChange = viewModel::updateMinTotalQuantityFilter,
         onMaxTotalQuantityChange = viewModel::updateMaxTotalQuantityFilter,
+        onStartDateChange = viewModel::updateStartDateFilter,
+        onEndDateChange = viewModel::updateEndDateFilter,
         onNavigateBack = onNavigateBack
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun orderListScreenContent(
     orders: List<Order>,
@@ -89,6 +102,8 @@ fun orderListScreenContent(
     maxTotalAmount: Double?,
     minTotalQuantity: Int?,
     maxTotalQuantity: Int?,
+    startDate: Instant?,
+    endDate: Instant?,
     onSearchQueryChange: (String) -> Unit,
     onSortClick: (SortColumn) -> Unit,
     onNavigateToOrderDetail: (String) -> Unit,
@@ -96,6 +111,8 @@ fun orderListScreenContent(
     onMaxTotalAmountChange: (Double?) -> Unit,
     onMinTotalQuantityChange: (Int?) -> Unit,
     onMaxTotalQuantityChange: (Int?) -> Unit,
+    onStartDateChange: (Instant?) -> Unit,
+    onEndDateChange: (Instant?) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val orderIdWeight = 1.5f
@@ -109,7 +126,15 @@ fun orderListScreenContent(
     var minQuantityInput by remember { mutableStateOf(minTotalQuantity?.toString() ?: "") }
     var maxQuantityInput by remember { mutableStateOf(maxTotalQuantity?.toString() ?: "") }
 
+    var showStartDatePicker by remember { mutableStateOf(false) }
+    var showEndDatePicker by remember { mutableStateOf(false) }
+
     val listState = rememberLazyListState()
+
+    val dateFormatter = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
+    fun formatInstant(instant: Instant?): String {
+        return instant?.let { dateFormatter.format(Date.from(it.toJavaInstant())) } ?: ""
+    }
 
     LaunchedEffect(orders) {
         listState.scrollToItem(index = 0)
@@ -119,6 +144,61 @@ fun orderListScreenContent(
     LaunchedEffect(maxTotalAmount) { maxAmountInput = maxTotalAmount?.toString() ?: "" }
     LaunchedEffect(minTotalQuantity) { minQuantityInput = minTotalQuantity?.toString() ?: "" }
     LaunchedEffect(maxTotalQuantity) { maxQuantityInput = maxTotalQuantity?.toString() ?: "" }
+
+
+    val startDatePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = startDate?.toEpochMilliseconds()
+    )
+    val endDatePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = endDate?.toEpochMilliseconds()
+    )
+
+
+    if (showStartDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showStartDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val selectedDate = startDatePickerState.selectedDateMillis?.let {
+                            Instant.fromEpochMilliseconds(it)
+                        }
+                        onStartDateChange(selectedDate)
+                        showStartDatePicker = false
+                    }
+                ) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showStartDatePicker = false }) { Text("Cancel") }
+            }
+        ) {
+            DatePicker(state = startDatePickerState)
+        }
+    }
+
+    if (showEndDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showEndDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val selectedDate = endDatePickerState.selectedDateMillis?.let {
+                            val endOfDayMillis = it + TimeUnit.DAYS.toMillis(1) - 1
+                            Instant.fromEpochMilliseconds(endOfDayMillis)
+                        }
+                        onEndDateChange(selectedDate)
+                        showEndDatePicker = false
+                    }
+                ) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEndDatePicker = false }) { Text("Cancel") }
+            }
+        ) {
+            DatePicker(state = endDatePickerState)
+        }
+    }
+
 
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Row(
@@ -243,12 +323,85 @@ fun orderListScreenContent(
                                 label = { Text("Max") })
                         }
                     }
+                    item {
+                        Text("Order Date", style = MaterialTheme.typography.titleSmall)
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedTextField(
+                                value = formatInstant(startDate),
+                                onValueChange = {},
+                                modifier = Modifier.weight(1f),
+                                label = { Text("Start Date") },
+                                placeholder = { Text("YYYY-MM-DD") },
+                                readOnly = true,
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.DateRange,
+                                        contentDescription = "Select Start Date"
+                                    )
+                                },
+                                trailingIcon = {
+                                    if (startDate != null) {
+                                        IconButton(onClick = { onStartDateChange(null) }) {
+                                            Icon(
+                                                imageVector = Icons.Default.Clear,
+                                                contentDescription = "Clear Start Date"
+                                            )
+                                        }
+                                    }
+                                },
+                                interactionSource = remember { MutableInteractionSource() }
+                                    .also { interactionSource ->
+                                        LaunchedEffect(interactionSource) {
+                                            interactionSource.interactions.collect {
+                                                if (it is PressInteraction.Release) {
+                                                    showStartDatePicker = true
+                                                }
+                                            }
+                                        }
+                                    }
+                            )
+
+                            OutlinedTextField(
+                                value = formatInstant(endDate),
+                                onValueChange = {},
+                                modifier = Modifier.weight(1f),
+                                label = { Text("End Date") },
+                                placeholder = { Text("YYYY-MM-DD") },
+                                readOnly = true,
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.DateRange,
+                                        contentDescription = "Select End Date"
+                                    )
+                                },
+                                trailingIcon = {
+                                    if (endDate != null) {
+                                        IconButton(onClick = { onEndDateChange(null) }) {
+                                            Icon(
+                                                imageVector = Icons.Default.Clear,
+                                                contentDescription = "Clear End Date"
+                                            )
+                                        }
+                                    }
+                                },
+                                interactionSource = remember { MutableInteractionSource() }
+                                    .also { interactionSource ->
+                                        LaunchedEffect(interactionSource) {
+                                            interactionSource.interactions.collect {
+                                                if (it is PressInteraction.Release) {
+                                                    showEndDatePicker = true
+                                                }
+                                            }
+                                        }
+                                    }
+                            )
+                        }
+                    }
                 }
             }
         }
     }
 }
-
 
 private data class OrderTableWeights(
     val id: Float,

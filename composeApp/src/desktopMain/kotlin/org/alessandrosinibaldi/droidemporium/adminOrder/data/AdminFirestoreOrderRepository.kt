@@ -16,10 +16,8 @@ import org.alessandrosinibaldi.droidemporium.core.domain.Result
 
 class AdminFirestoreOrderRepository : AdminOrderRepository {
 
-
     private val firestore = Firebase.firestore
-    private val ordersCollection = firestore.collection("orders")
-    //private val clientsCollection = firestore.collection("clients")
+    private val ordersCollection = Firebase.firestore.collection("orders")
 
 
     override fun searchOrders(query: String): Flow<Result<List<Order>>> = flow {
@@ -112,4 +110,29 @@ class AdminFirestoreOrderRepository : AdminOrderRepository {
         }
     }
 
+    override suspend fun getOrdersByClient(clientId: String): Result<List<Order>> {
+        return try {
+            val querySnapshot = ordersCollection
+                .where { "clientId" equalTo clientId }
+                .get()
+
+            val orders = coroutineScope {
+                querySnapshot.documents.map { orderDoc ->
+                    async {
+                        val linesSnapshot = orderDoc.reference.collection("orderLines").get()
+                        val domainLines = linesSnapshot.documents.map { lineDoc ->
+                            lineDoc.data<OrderLineDto>().toDomain(id = lineDoc.id)
+                        }
+                        val orderDto = orderDoc.data<OrderDto>()
+                        orderDto.toDomain(id = orderDoc.id, lines = domainLines)
+                    }
+                }
+            }.awaitAll()
+
+            Result.Success(orders)
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+
+    }
 }

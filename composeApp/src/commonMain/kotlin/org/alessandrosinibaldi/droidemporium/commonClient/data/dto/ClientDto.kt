@@ -1,4 +1,4 @@
-package org.alessandrosinibaldi.droidemporium.adminClient.data.dto
+package org.alessandrosinibaldi.droidemporium.commonClient.data.dto
 
 import kotlinx.serialization.Serializable
 import org.alessandrosinibaldi.droidemporium.commonClient.domain.Client
@@ -8,7 +8,6 @@ data class ClientDto(
     val displayName: String = "",
     val email: String = "",
     val phoneNumber: String? = null,
-    val isActive: Boolean = true
 )
 
 fun ClientDto.toDomain(id: String): Client {
@@ -17,7 +16,6 @@ fun ClientDto.toDomain(id: String): Client {
         displayName = this.displayName,
         email = this.email,
         phoneNumber = this.phoneNumber,
-        isActive = this.isActive
     )
 }
 

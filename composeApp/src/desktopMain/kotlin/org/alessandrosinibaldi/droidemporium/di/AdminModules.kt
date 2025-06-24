@@ -34,6 +34,9 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import org.alessandrosinibaldi.droidemporium.adminClient.presentation.ClientDetailViewModel
+import org.alessandrosinibaldi.droidemporium.commonAddress.data.FirestoreAddressRepository
+import org.alessandrosinibaldi.droidemporium.commonAddress.domain.AddressRepository
 
 
 val desktopAppModule = module {
@@ -86,6 +89,8 @@ val desktopAppModule = module {
     singleOf(::FirestoreClientRepository).bind<AdminClientRepository>()
     singleOf(::AdminFirestoreOrderRepository).bind<AdminOrderRepository>()
     singleOf(::AdminFirestoreReviewRepository).bind<AdminReviewRepository>()
+    singleOf(::FirestoreAddressRepository).bind<AddressRepository>()
+
 
     viewModelOf(::ClientListViewModel)
 
@@ -130,6 +135,16 @@ val desktopAppModule = module {
             adminOrderRepository = get(),
             adminClientRepository = get(),
             orderId = params.getOrNull()
+        )
+    }
+
+    viewModel { params ->
+        ClientDetailViewModel(
+            adminClientRepository = get(),
+            adminOrderRepository = get(),
+            adminReviewRepository = get(),
+            addressRepository = get(),
+            clientId = params.getOrNull()
         )
     }
 

@@ -11,6 +11,8 @@ import org.alessandrosinibaldi.droidemporium.adminOrder.presentation.orderListSc
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductDetailScreen
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductFormScreen
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductScreen
+import org.alessandrosinibaldi.droidemporium.adminClient.presentation.ClientDetailScreen
+
 
 
 @Composable
@@ -63,6 +65,14 @@ fun AdminApp() {
 
         composable<Route.ClientList> {
             ClientListScreen(navController = navController)
+        }
+
+        composable<Route.ClientDetail> { backStackEntry ->
+            val clientId = backStackEntry.arguments?.getString("clientId")
+            ClientDetailScreen(
+                clientId = clientId,
+                navController = navController
+            )
         }
 
         composable<Route.OrderList> {

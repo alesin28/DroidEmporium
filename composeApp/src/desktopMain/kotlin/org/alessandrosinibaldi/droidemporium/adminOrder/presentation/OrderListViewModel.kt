@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.datetime.Instant
 import org.alessandrosinibaldi.droidemporium.adminOrder.domain.AdminOrderRepository
 import org.alessandrosinibaldi.droidemporium.commonOrder.domain.Order
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
@@ -32,7 +33,7 @@ class OrderListViewModel(
     private val _sortColumn = MutableStateFlow(SortColumn.ORDER_DATE)
     val sortColumn: StateFlow<SortColumn> = _sortColumn.asStateFlow()
 
-    private val _sortDirection = MutableStateFlow(SortDirection.DESCENDING) // Default to newest first
+    private val _sortDirection = MutableStateFlow(SortDirection.DESCENDING)
     val sortDirection: StateFlow<SortDirection> = _sortDirection.asStateFlow()
 
     private val _minTotalAmountFilter = MutableStateFlow<Double?>(null)
@@ -47,8 +48,15 @@ class OrderListViewModel(
     private val _maxTotalQuantityFilter = MutableStateFlow<Int?>(null)
     val maxTotalQuantityFilter: StateFlow<Int?> = _maxTotalQuantityFilter.asStateFlow()
 
+    private val _startDateFilter = MutableStateFlow<Instant?>(null)
+    val startDateFilter: StateFlow<Instant?> = _startDateFilter.asStateFlow()
+
+    private val _endDateFilter = MutableStateFlow<Instant?>(null)
+    val endDateFilter: StateFlow<Instant?> = _endDateFilter.asStateFlow()
+
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
 
     private val sortStateFlow: Flow<SortState> = combine(
         _sortColumn,
@@ -57,14 +65,22 @@ class OrderListViewModel(
         SortState(sortColumn, sortDirection)
     }
 
-    private val filterStateFlow: Flow<FilterState> = combine(
+    private val numericFilterStateFlow: Flow<NumericFilterState> = combine(
         _minTotalAmountFilter,
         _maxTotalAmountFilter,
         _minTotalQuantityFilter,
         _maxTotalQuantityFilter
     ) { minAmount, maxAmount, minQty, maxQty ->
-        FilterState(minAmount, maxAmount, minQty, maxQty)
+        NumericFilterState(minAmount, maxAmount, minQty, maxQty)
     }
+
+    private val dateFilterStateFlow: Flow<DateFilterState> = combine(
+        _startDateFilter,
+        _endDateFilter
+    ) { startDate, endDate ->
+        DateFilterState(startDate, endDate)
+    }
+
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     val orders: StateFlow<List<Order>> = run {
@@ -86,8 +102,9 @@ class OrderListViewModel(
         combine(
             ordersSourceFlow,
             sortStateFlow,
-            filterStateFlow
-        ) { ordersList, sortState, filterState ->
+            numericFilterStateFlow,
+            dateFilterStateFlow
+        ) { ordersList, sortState, numericFilters, dateFilters ->
 
             val sortedList = when (sortState.sortColumn) {
                 SortColumn.ORDER_DATE -> {
@@ -118,14 +135,18 @@ class OrderListViewModel(
                 val totalQuantity = order.lines.sumOf { it.quantity }
 
                 val amountMatch =
-                    (filterState.minTotalAmount == null || order.totalAmount >= filterState.minTotalAmount) &&
-                            (filterState.maxTotalAmount == null || order.totalAmount <= filterState.maxTotalAmount)
+                    (numericFilters.minTotalAmount == null || order.totalAmount >= numericFilters.minTotalAmount) &&
+                            (numericFilters.maxTotalAmount == null || order.totalAmount <= numericFilters.maxTotalAmount)
 
                 val quantityMatch =
-                    (filterState.minTotalQuantity == null || totalQuantity >= filterState.minTotalQuantity) &&
-                            (filterState.maxTotalQuantity == null || totalQuantity <= filterState.maxTotalQuantity)
+                    (numericFilters.minTotalQuantity == null || totalQuantity >= numericFilters.minTotalQuantity) &&
+                            (numericFilters.maxTotalQuantity == null || totalQuantity <= numericFilters.maxTotalQuantity)
 
-                amountMatch && quantityMatch
+                val dateMatch =
+                    (dateFilters.startDate == null || order.orderDate >= dateFilters.startDate) &&
+                            (dateFilters.endDate == null || order.orderDate <= dateFilters.endDate)
+
+                amountMatch && quantityMatch && dateMatch
             }
         }.stateIn(
             scope = viewModelScope,
@@ -168,18 +189,28 @@ class OrderListViewModel(
         _maxTotalQuantityFilter.value = maxQty
     }
 
+    fun updateStartDateFilter(startDate: Instant?) {
+        _startDateFilter.value = startDate
+    }
 
-    // --- Internal State-Holding Data Classes ---
+    fun updateEndDateFilter(endDate: Instant?) {
+        _endDateFilter.value = endDate
+    }
 
     data class SortState(
         val sortColumn: SortColumn,
         val sortDirection: SortDirection
     )
 
-    data class FilterState(
+    data class NumericFilterState(
         val minTotalAmount: Double?,
         val maxTotalAmount: Double?,
         val minTotalQuantity: Int?,
         val maxTotalQuantity: Int?
+    )
+
+    data class DateFilterState(
+        val startDate: Instant?,
+        val endDate: Instant?
     )
 }

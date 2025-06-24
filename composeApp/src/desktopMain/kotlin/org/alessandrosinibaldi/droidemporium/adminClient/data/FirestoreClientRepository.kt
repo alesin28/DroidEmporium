@@ -4,8 +4,8 @@ import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.firestore.firestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import org.alessandrosinibaldi.droidemporium.adminClient.data.dto.ClientDto
-import org.alessandrosinibaldi.droidemporium.adminClient.data.dto.toDomain
+import org.alessandrosinibaldi.droidemporium.commonClient.data.dto.ClientDto
+import org.alessandrosinibaldi.droidemporium.commonClient.data.dto.toDomain
 import org.alessandrosinibaldi.droidemporium.commonClient.domain.Client
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
 import kotlinx.coroutines.async
@@ -16,8 +16,7 @@ import org.alessandrosinibaldi.droidemporium.adminClient.domain.AdminClientRepos
 
 class FirestoreClientRepository : AdminClientRepository {
 
-    private val firestore = Firebase.firestore
-    private val clientsCollection = firestore.collection("clients")
+    private val clientsCollection = Firebase.firestore.collection("clients")
 
     override fun searchClients(query: String): Flow<Result<List<Client>>> = flow {
         try {
@@ -46,7 +45,6 @@ class FirestoreClientRepository : AdminClientRepository {
 
 
     override suspend fun getClientById(id: String): Result<Client?> {
-        // Wrap the entire network operation in a try-catch block for safety.
         return try {
             val snapshot = clientsCollection.document(id).get()
 

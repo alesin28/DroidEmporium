@@ -1,6 +1,5 @@
 package org.alessandrosinibaldi.droidemporium.adminClient.presentation
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -24,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import org.alessandrosinibaldi.droidemporium.adminClient.presentation.ClientListViewModel.SortColumn
 import org.alessandrosinibaldi.droidemporium.adminClient.presentation.ClientListViewModel.SortDirection
+import org.alessandrosinibaldi.droidemporium.app.Route
 import org.alessandrosinibaldi.droidemporium.commonClient.domain.Client
 import org.alessandrosinibaldi.droidemporium.core.components.MenuReturnButton
 import org.koin.compose.viewmodel.koinViewModel
@@ -35,27 +35,25 @@ fun ClientListScreen(
 ) {
     val clients by viewModel.clients.collectAsState()
     val query by viewModel.searchQuery.collectAsState()
-    val active by viewModel.isActiveFilter.collectAsState()
-    val inactive by viewModel.isInactiveFilter.collectAsState()
     val sortColumn by viewModel.sortColumn.collectAsState()
     val sortDirection by viewModel.sortDirection.collectAsState()
 
     val onNavigateBack: () -> Unit = {
         navController.popBackStack()
     }
+    val onNavigateToClientDetail: (String) -> Unit = { clientId ->
+        navController.navigate(Route.ClientDetail(clientId = clientId))
+    }
 
     clientListScreenContent(
         clients = clients,
         query = query,
-        active = active,
-        inactive = inactive,
         sortColumn = sortColumn,
         sortDirection = sortDirection,
         onClientSearch = viewModel::updateQuery,
         onSortClick = viewModel::updateSort,
-        onActiveFilterChange = viewModel::updateActiveFilter,
-        onInactiveFilterChange = viewModel::updateInactiveFilter,
-        onNavigateBack = onNavigateBack
+        onNavigateBack = onNavigateBack,
+        onNavigateToClientDetail = onNavigateToClientDetail
     )
 }
 
@@ -63,20 +61,16 @@ fun ClientListScreen(
 fun clientListScreenContent(
     clients: List<Client>,
     query: String,
-    active: Boolean,
-    inactive: Boolean,
     sortColumn: SortColumn,
     sortDirection: SortDirection,
     onClientSearch: (String) -> Unit,
     onSortClick: (SortColumn) -> Unit,
-    onActiveFilterChange: (Boolean) -> Unit,
-    onInactiveFilterChange: (Boolean) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToClientDetail: (String) -> Unit
 ) {
-    val nameWeight = 2f
-    val emailWeight = 2.5f
+    val nameWeight = 2.5f
+    val emailWeight = 3f
     val phoneWeight = 1.5f
-    val statusWeight = 1f
 
     val listState = rememberLazyListState()
 
@@ -113,8 +107,7 @@ fun clientListScreenContent(
                     weights = ClientTableWeights(
                         nameWeight,
                         emailWeight,
-                        phoneWeight,
-                        statusWeight
+                        phoneWeight
                     ),
                     sortColumn = sortColumn,
                     sortDirection = sortDirection,
@@ -133,9 +126,9 @@ fun clientListScreenContent(
                                 weights = ClientTableWeights(
                                     nameWeight,
                                     emailWeight,
-                                    phoneWeight,
-                                    statusWeight
-                                )
+                                    phoneWeight
+                                ),
+                                onClick = { onNavigateToClientDetail(client.id) }
                             )
                             HorizontalDivider(
                                 thickness = 1.dp,
@@ -154,35 +147,7 @@ fun clientListScreenContent(
                 }
             }
 
-            Spacer(Modifier.width(24.dp))
 
-            Surface(
-                modifier = Modifier.weight(1f),
-                shape = MaterialTheme.shapes.medium,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxSize().padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Text("Filters", style = MaterialTheme.typography.titleLarge)
-                    Column {
-                        Text("Status", style = MaterialTheme.typography.titleSmall)
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.clickable { onActiveFilterChange(!active) }) {
-                            Checkbox(checked = active, onCheckedChange = onActiveFilterChange)
-                            Text("Active")
-                        }
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.clickable { onInactiveFilterChange(!inactive) }) {
-                            Checkbox(checked = inactive, onCheckedChange = onInactiveFilterChange)
-                            Text("Inactive")
-                        }
-                    }
-                }
-            }
         }
     }
 }
@@ -191,8 +156,7 @@ fun clientListScreenContent(
 private data class ClientTableWeights(
     val name: Float,
     val email: Float,
-    val phone: Float,
-    val status: Float
+    val phone: Float
 )
 
 @Composable
@@ -219,22 +183,26 @@ private fun ClientTableHeader(
         ) { onSortClick(SortColumn.NAME) }
         HeaderCell("Email", weights.email, false)
         HeaderCell("Phone", weights.phone, false)
-        HeaderCell("Status", weights.status, false, alignment = TextAlign.Center)
     }
 }
 
 @Composable
-private fun ClientItemRow(client: Client, weights: ClientTableWeights) {
+private fun ClientItemRow(client: Client, weights: ClientTableWeights, onClick: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp)
+            .clickable(onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically,
+
+        ) {
         DataCell(modifier = Modifier.weight(weights.name)) {
             Text(
                 client.displayName,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary
             )
         }
         DataCell(modifier = Modifier.weight(weights.email)) {
@@ -242,15 +210,6 @@ private fun ClientItemRow(client: Client, weights: ClientTableWeights) {
         }
         DataCell(modifier = Modifier.weight(weights.phone)) {
             Text(client.phoneNumber ?: "N/A", maxLines = 1)
-        }
-        DataCell(modifier = Modifier.weight(weights.status), alignment = Alignment.Center) {
-            Text(
-                text = if (client.isActive) "Active" else "Inactive",
-                color = if (client.isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(
-                    alpha = 0.6f
-                ),
-                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
-            )
         }
     }
 }

@@ -5,5 +5,4 @@ data class Client(
     val displayName: String,
     val email: String,
     val phoneNumber: String?,
-    val isActive: Boolean
 )

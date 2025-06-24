@@ -25,6 +25,8 @@ sealed class Route {
 
     @Serializable
     data object ClientList : Route()
+    @Serializable
+    data class ClientDetail(val clientId: String) : Route()
 
     @Serializable
     data object OrderList : Route()

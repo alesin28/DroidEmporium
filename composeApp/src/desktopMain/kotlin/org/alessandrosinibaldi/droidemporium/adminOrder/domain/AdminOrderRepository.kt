@@ -8,4 +8,6 @@ interface AdminOrderRepository : OrderRepository {
 
     suspend fun getOrdersByProduct(clientId: String): Result<List<Order>>
 
+    suspend fun getOrdersByClient(clientId: String): Result<List<Order>>
+
 }

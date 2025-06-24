@@ -25,8 +25,6 @@ fun ClientItem(
     val nameWeight = 1f
     val emailWeight = 2f
     val phoneWeight = 2f
-    val activeWeight = 1f
-
 
     Row(
         modifier = Modifier
@@ -68,13 +66,6 @@ fun ClientItem(
             thickness = 1.dp
         )
 
-        Text(
-            modifier = Modifier.padding(horizontal = 8.dp)
-                .weight(activeWeight),
-            text = if (client.isActive) "Active" else "Inactive",
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
         VerticalDivider(
             thickness = 1.dp
         )
