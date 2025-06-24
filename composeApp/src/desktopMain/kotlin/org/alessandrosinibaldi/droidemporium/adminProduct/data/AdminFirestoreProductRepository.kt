@@ -80,14 +80,26 @@ class AdminFirestoreProductRepository(
         }
     }
 
-    override suspend fun deleteProduct(productId: String): Result<Unit> {
+    override suspend fun changeProductState(productId: String): Result<Unit> {
         return try {
-            println("Deleting product with ID: $productId")
-            productsCollection.document(productId).delete()
+            val document = productsCollection.document(productId)
+            val snapshot = document.get()
 
-            Result.Success(Unit)
+            if (snapshot.exists) {
+                val currentStatus = snapshot.get<Boolean?>("isActive") == true
+                val newStatus = !currentStatus
+
+                document.update("isActive" to newStatus)
+
+                println("Changed state for product $productId to isActive=$newStatus")
+                Result.Success(Unit)
+            } else {
+                val error = Exception("Product with ID $productId not found.")
+                println(error.message)
+                Result.Failure(error)
+            }
         } catch (e: Exception) {
-            println("Error deleting product $productId: ${e.message}")
+            println("Error changing product state for $productId: ${e.message}")
             Result.Failure(e)
         }
     }

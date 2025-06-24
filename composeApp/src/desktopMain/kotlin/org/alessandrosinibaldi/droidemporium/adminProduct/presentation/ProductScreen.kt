@@ -46,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import org.alessandrosinibaldi.droidemporium.adminProduct.components.ProductItemWeights
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductListViewModel.SortDirection
 import androidx.compose.foundation.lazy.rememberLazyListState
+import org.alessandrosinibaldi.droidemporium.adminProduct.components.ChangeStatusConfirmationDialog
 import org.alessandrosinibaldi.droidemporium.core.components.MenuReturnButton
 
 @Composable
@@ -90,7 +91,7 @@ fun ProductScreen(
         active = active,
         inactive = inactive,
         query = query,
-        deleteProduct = viewModel::deleteProduct,
+        deleteProduct = viewModel::changeProductStatus,
         onNavigateToAddProduct = onNavigateToAddProduct,
         onNavigateToEditProduct = onNavigateToEditProduct,
         onNavigateToProductDetail = onNavigateToProductDetail,
@@ -148,6 +149,7 @@ fun productScreenContent(
 
     val listState = rememberLazyListState()
 
+    var productForStatusChange by remember { mutableStateOf<Product?>(null) }
 
     var minPriceInput by remember { mutableStateOf(minPrice?.toString() ?: "") }
     var maxPriceInput by remember { mutableStateOf(maxPrice?.toString() ?: "") }
@@ -162,6 +164,19 @@ fun productScreenContent(
     LaunchedEffect(maxPrice) { maxPriceInput = maxPrice?.toString() ?: "" }
     LaunchedEffect(minStock) { minStockInput = minStock?.toString() ?: "" }
     LaunchedEffect(maxStock) { maxStockInput = maxStock?.toString() ?: "" }
+
+    productForStatusChange?.let { product ->
+        ChangeStatusConfirmationDialog(
+            product = product,
+            onConfirm = {
+                deleteProduct(product)
+                productForStatusChange = null
+            },
+            onDismiss = {
+                productForStatusChange = null
+            }
+        )
+    }
 
 
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -243,7 +258,7 @@ fun productScreenContent(
                                 ProductItem(
                                     product = product,
                                     category = category,
-                                    deleteProduct = deleteProduct,
+                                    onStatusChangeRequest = { productForStatusChange = it },
                                     editProduct = onNavigateToEditProduct,
                                     onNavigateToProductDetail = onNavigateToProductDetail,
                                     weights = ProductItemWeights(

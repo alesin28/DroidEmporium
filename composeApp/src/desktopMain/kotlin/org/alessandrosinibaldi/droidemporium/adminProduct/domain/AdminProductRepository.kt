@@ -7,7 +7,7 @@ import java.io.File
 
 interface AdminProductRepository : ProductRepository {
     suspend fun updateProduct(product: Product): Result<Unit>
-    suspend fun deleteProduct(productId: String): Result<Unit>
+    suspend fun changeProductState(productId: String): Result<Unit>
     suspend fun addProduct(
         name: String,
         description: String,

@@ -246,16 +246,16 @@ class ProductListViewModel(
         _isInactiveFilter.value = isInactive
     }
 
-    fun deleteProduct(product: Product) {
+    fun changeProductStatus(product: Product) {
         viewModelScope.launch {
-            val result = adminProductRepository.deleteProduct(product.id)
+            val result = adminProductRepository.changeProductState(product.id)
             when (result) {
                 is Result.Success -> {
-                    println("Successfully deleted product ${product.id}")
+                    println("Successfully changed status of product ${product.id}")
                 }
 
                 is Result.Failure -> {
-                    println("Failed to delete product ${product.id}: ${result.exception.message}")
+                    println("Failed to change status of product ${product.id}: ${result.exception.message}")
                 }
             }
         }
