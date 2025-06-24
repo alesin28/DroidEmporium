@@ -61,6 +61,9 @@ fun ProductDetailScreen(
             navController.navigate(Route.ProductEdit(productId = productId))
         }
     }
+    val onNavigateToOrderDetail: (String) -> Unit = { orderId ->
+        navController.navigate(Route.OrderDetail(orderId = orderId))
+    }
 
     ProductDetailScreenContent(
         product = product,
@@ -69,7 +72,8 @@ fun ProductDetailScreen(
         orders = orders,
         isLoading = isLoading,
         onNavigateBack = { navController.popBackStack() },
-        onNavigateToEdit = onNavigateToEdit
+        onNavigateToEdit = onNavigateToEdit,
+        onNavigateToOrderDetail = onNavigateToOrderDetail
     )
 }
 
@@ -81,7 +85,8 @@ fun ProductDetailScreenContent(
     orders: List<Order>,
     isLoading: Boolean,
     onNavigateBack: () -> Unit,
-    onNavigateToEdit: () -> Unit
+    onNavigateToEdit: () -> Unit,
+    onNavigateToOrderDetail: (String) -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -150,7 +155,8 @@ fun ProductDetailScreenContent(
                                     shape = MaterialTheme.shapes.large,
                                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                                 ) {
-                                    val largeImageUrl = "https://res.cloudinary.com/dovupsygm/image/upload/w_800/$selectedImageId"
+                                    val largeImageUrl =
+                                        "https://res.cloudinary.com/dovupsygm/image/upload/w_800/$selectedImageId"
                                     Image(
                                         painter = rememberImagePainter(largeImageUrl),
                                         contentDescription = "Selected product image",
@@ -206,7 +212,11 @@ fun ProductDetailScreenContent(
                                     reviews,
                                     key = { it.id }) { review -> ReviewItem(review) }
 
-                                1 -> items(orders, key = { it.id }) { order -> OrderItem(order) }
+                                1 -> items(orders, key = { it.id }) { order ->
+                                    OrderItem(
+                                        order = order,
+                                        onClick = { onNavigateToOrderDetail(order.id) })
+                                }
                             }
                         }
                     }
@@ -291,10 +301,11 @@ private fun ReviewItem(review: Review) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun OrderItem(order: Order) {
+private fun OrderItem(order: Order, onClick: () -> Unit) {
     val dateFormatter = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
 
     Card(
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
@@ -378,7 +389,10 @@ private fun ThumbnailImageCard(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(4.dp)
-                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f), CircleShape)
+                        .background(
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                            CircleShape
+                        )
                         .size(20.dp)
                 )
             }
