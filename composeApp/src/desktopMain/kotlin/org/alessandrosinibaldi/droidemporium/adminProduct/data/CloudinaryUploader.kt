@@ -2,17 +2,16 @@ package org.alessandrosinibaldi.droidemporium.adminProduct.data
 
 import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
+import io.ktor.util.hex
+import io.ktor.util.sha1
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
+import org.alessandrosinibaldi.droidemporium.core.config.CloudinaryConfig
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.nio.file.Files
 
 @Serializable
 data class CloudinaryUploadResponse(
@@ -22,37 +21,39 @@ data class CloudinaryUploadResponse(
     val secureUrl: String
 )
 
-class CloudinaryUploader {
+class CloudinaryUploader(
+    private val client: HttpClient,
+    private val config: CloudinaryConfig
+) {
 
-    val cloudName = "dovupsygm"
-    private val uploadPreset = "testing"
-    private val client = HttpClient(CIO) {
-        install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
-        install(Logging) {
-            level = LogLevel.ALL
-            logger = Logger.DEFAULT
-        }
-        expectSuccess = true
-    }
-
-    suspend fun uploadImage(file: File): String {
-        val url = "https://api.cloudinary.com/v1_1/$cloudName/image/upload"
+    suspend fun uploadImage(file: File): CloudinaryUploadResponse {
+        val url = "https://api.cloudinary.com/v1_1/${config.cloudName}/image/upload"
+        val timestamp = (System.currentTimeMillis() / 1000).toString()
+        val signature = generateSignature(timestamp)
 
         val boundary = "Boundary-${System.currentTimeMillis()}"
         val CRLF = "\r\n"
 
         val outputStream = ByteArrayOutputStream()
 
-        outputStream.write("--$boundary$CRLF".toByteArray())
-        outputStream.write("Content-Disposition: form-data; name=\"upload_preset\"$CRLF".toByteArray())
-        outputStream.write("Content-Type: text/plain; charset=UTF-8$CRLF".toByteArray())
-        outputStream.write(CRLF.toByteArray())
-        outputStream.write(uploadPreset.toByteArray())
-        outputStream.write(CRLF.toByteArray())
+        fun addFormField(name: String, value: String) {
+            outputStream.write("--$boundary$CRLF".toByteArray())
+            outputStream.write("Content-Disposition: form-data; name=\"$name\"$CRLF".toByteArray())
+            outputStream.write("Content-Type: text/plain; charset=UTF-8$CRLF".toByteArray())
+            outputStream.write(CRLF.toByteArray())
+            outputStream.write(value.toByteArray())
+            outputStream.write(CRLF.toByteArray())
+        }
 
+        addFormField("api_key", config.apiKey)
+        addFormField("timestamp", timestamp)
+        addFormField("upload_preset", config.preset)
+        addFormField("signature", signature)
+
+        val contentType = Files.probeContentType(file.toPath()) ?: "application/octet-stream"
         outputStream.write("--$boundary$CRLF".toByteArray())
         outputStream.write("Content-Disposition: form-data; name=\"file\"; filename=\"${file.name}\"$CRLF".toByteArray())
-        outputStream.write("Content-Type: image/jpeg$CRLF".toByteArray())
+        outputStream.write("Content-Type: $contentType$CRLF".toByteArray())
         outputStream.write(CRLF.toByteArray())
         outputStream.write(file.readBytes())
         outputStream.write(CRLF.toByteArray())
@@ -67,12 +68,26 @@ class CloudinaryUploader {
                 contentType(ContentType("multipart", "form-data").withParameter("boundary", boundary))
             }.body()
 
-            println("Cloudinary upload SUCCEEDED. Public ID: ${response.publicId}")
-            return response.publicId
+            println("Cloudinary upload SUCCEEDED. Secure URL: ${response.secureUrl}")
+            return response
 
         } catch (e: Exception) {
             println("Cloudinary upload failed (MANUAL BODY): ${e.message}")
+            e.printStackTrace()
             throw e
         }
+    }
+
+    private fun generateSignature(timestamp: String): String {
+        val params = sortedMapOf<String, String>()
+        params["timestamp"] = timestamp
+        params["upload_preset"] = config.preset
+
+        val paramsToSign = params.map { (key, value) -> "$key=$value" }.joinToString("&")
+
+        val finalStringToSign = "$paramsToSign${config.apiSecret}"
+
+        val hashBytes = sha1(finalStringToSign.toByteArray(Charsets.UTF_8))
+        return hex(hashBytes)
     }
 }

@@ -39,7 +39,7 @@ class FirestoreAddressRepository : AddressRepository {
             }
 
             val newAddressDto = AddressDto(
-                label = address.label, street = address.street, city = address.city,
+                label = address.label, name = address.name, surname = address.surname, street = address.street, city = address.city,
                 province = address.province, postalCode = address.postalCode, country = address.country,
                 isDefault = address.isDefault
             )
@@ -69,7 +69,7 @@ class FirestoreAddressRepository : AddressRepository {
             }
 
             val addressDto = AddressDto(
-                label = address.label, street = address.street, city = address.city,
+                label = address.label, name = address.name, surname = address.surname, street = address.street, city = address.city,
                 province = address.province, postalCode = address.postalCode, country = address.country,
                 isDefault = address.isDefault
             )

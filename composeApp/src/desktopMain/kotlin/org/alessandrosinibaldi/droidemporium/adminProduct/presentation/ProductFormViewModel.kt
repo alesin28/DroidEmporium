@@ -17,6 +17,7 @@ import org.alessandrosinibaldi.droidemporium.adminProduct.domain.AdminProductRep
 import org.alessandrosinibaldi.droidemporium.commonCategory.domain.Category
 import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
 import org.alessandrosinibaldi.droidemporium.commonCategory.domain.CategoryRepository
+import org.alessandrosinibaldi.droidemporium.core.config.CloudinaryConfig
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
 import java.io.File
 
@@ -28,6 +29,7 @@ class ProductFormViewModel(
     private val adminProductRepository: AdminProductRepository,
     private val categoryRepository: CategoryRepository,
     private val cloudinaryUploader: CloudinaryUploader,
+    private val cloudinaryConfig: CloudinaryConfig,
     private val productId: String?
 ) : ViewModel() {
 
@@ -44,7 +46,7 @@ class ProductFormViewModel(
     val categories: StateFlow<List<Category>> = _categories.asStateFlow()
     private val _eventChannel = Channel<ProductFormEvent>()
     val events = _eventChannel.receiveAsFlow()
-    val cloudinaryCloudName = cloudinaryUploader.cloudName
+    val cloudinaryCloudName = cloudinaryConfig.cloudName
 
     val selectedLocalFiles = mutableStateListOf<File>()
     val existingImageIds = mutableStateListOf<String>()
@@ -101,7 +103,7 @@ class ProductFormViewModel(
         viewModelScope.launch {
             try {
                 val newlyUploadedIds = selectedLocalFiles.map { file ->
-                    cloudinaryUploader.uploadImage(file)
+                    cloudinaryUploader.uploadImage(file).publicId
                 }
 
                 val allImageIds = existingImageIds + newlyUploadedIds

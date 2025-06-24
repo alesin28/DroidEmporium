@@ -20,15 +20,13 @@ import org.alessandrosinibaldi.droidemporium.commonCategory.domain.CategoryRepos
 
 
 class CategoryListViewModel(
-    private val categoryRepository: CategoryRepository,
-    private val adminProductRepository: AdminProductRepository
-
+    categoryRepository: CategoryRepository,
+    adminProductRepository: AdminProductRepository
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow<String>("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    //private val _products = MutableStateFlow<List<Product>>(emptyList())
     val products: StateFlow<List<Product>> = adminProductRepository
         .searchProducts("")
         .map { result ->
@@ -48,7 +46,6 @@ class CategoryListViewModel(
             initialValue = emptyList()
         )
 
-    //private val _categories = MutableStateFlow<List<Category>>(emptyList())
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     val categories: StateFlow<List<Category>> = _searchQuery
         .debounce(300L)

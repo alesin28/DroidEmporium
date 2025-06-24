@@ -21,7 +21,6 @@ import java.util.Properties
 fun main() {
 
 
-
     val properties = Properties()
     val configFile = File("firebase_config.properties")
     FileInputStream(configFile).use { input ->

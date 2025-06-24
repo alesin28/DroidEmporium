@@ -1,15 +1,14 @@
-package org.alessandrosinibaldi.droidemporium.adminCategory.data
+package org.alessandrosinibaldi.droidemporium.commonCategory.data
 
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.firestore.firestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import org.alessandrosinibaldi.droidemporium.adminCategory.data.dto.CategoryDto
-import org.alessandrosinibaldi.droidemporium.adminCategory.data.dto.toDomain
+import org.alessandrosinibaldi.droidemporium.commonCategory.data.dto.CategoryDto
+import org.alessandrosinibaldi.droidemporium.commonCategory.data.dto.toDomain
 import org.alessandrosinibaldi.droidemporium.commonCategory.domain.Category
 import org.alessandrosinibaldi.droidemporium.commonCategory.domain.CategoryRepository
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
-
 
 class FirestoreCategoryRepository : CategoryRepository {
 

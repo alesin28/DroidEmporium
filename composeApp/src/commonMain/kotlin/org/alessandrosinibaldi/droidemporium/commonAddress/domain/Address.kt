@@ -2,6 +2,8 @@ package org.alessandrosinibaldi.droidemporium.commonAddress.domain
 
 data class Address(
     val id: String,
+    val name: String,
+    val surname: String,
     val label: String,
     val street: String,
     val city: String,

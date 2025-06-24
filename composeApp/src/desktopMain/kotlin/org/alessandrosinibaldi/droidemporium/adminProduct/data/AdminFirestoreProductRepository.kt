@@ -9,9 +9,12 @@ import org.alessandrosinibaldi.droidemporium.commonProduct.data.dto.toDomain
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.AdminProductRepository
 import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
+import java.io.File
 
 
-class AdminFirestoreProductRepository : AdminProductRepository {
+class AdminFirestoreProductRepository(
+    private val cloudinaryUploader: CloudinaryUploader
+) : AdminProductRepository {
     private val firestore = Firebase.firestore
     private val productsCollection = firestore.collection("products")
 
@@ -115,6 +118,15 @@ class AdminFirestoreProductRepository : AdminProductRepository {
             Result.Success(Unit)
         } catch (e: Exception) {
             println("Error adding product: ${e.message}")
+            Result.Failure(e)
+        }
+    }
+
+    override suspend fun uploadImageAndGetId(file: File): Result<String> {
+        return try {
+            val response = cloudinaryUploader.uploadImage(file)
+            Result.Success(response.publicId)
+        } catch (e: Exception) {
             Result.Failure(e)
         }
     }

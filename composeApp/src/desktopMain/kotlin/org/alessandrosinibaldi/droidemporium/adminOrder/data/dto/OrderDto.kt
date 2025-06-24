@@ -20,7 +20,7 @@ data class OrderDto(
 
 fun OrderDto.toDomain(id: String, lines: List<OrderLine>): Order {
     val domainAddress = this.address?.toDomain(id = "")
-        ?: Address(id="", label="N/A", street="N/A", city="N/A", province="N/A", postalCode="N/A", country="N/A")
+        ?: Address(id="", label="N/A", name="N/A", surname="N/A", street="N/A", city="N/A", province="N/A", postalCode="N/A", country="N/A")
 
     return Order(
         id = id,

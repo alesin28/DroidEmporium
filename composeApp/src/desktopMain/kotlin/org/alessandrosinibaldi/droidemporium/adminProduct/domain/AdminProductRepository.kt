@@ -3,6 +3,7 @@ package org.alessandrosinibaldi.droidemporium.adminProduct.domain
 import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
 import org.alessandrosinibaldi.droidemporium.commonProduct.domain.ProductRepository
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
+import java.io.File
 
 interface AdminProductRepository : ProductRepository {
     suspend fun updateProduct(product: Product): Result<Unit>
@@ -17,4 +18,6 @@ interface AdminProductRepository : ProductRepository {
         imageIds: List<String>,
         defaultImageId: String
     ): Result<Unit>
+    suspend fun uploadImageAndGetId(file: File): Result<String>
+
 }

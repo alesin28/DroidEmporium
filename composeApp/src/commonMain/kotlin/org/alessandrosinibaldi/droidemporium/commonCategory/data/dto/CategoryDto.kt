@@ -1,4 +1,4 @@
-package org.alessandrosinibaldi.droidemporium.adminCategory.data.dto
+package org.alessandrosinibaldi.droidemporium.commonCategory.data.dto
 
 import kotlinx.serialization.Serializable
 import org.alessandrosinibaldi.droidemporium.commonCategory.domain.Category
