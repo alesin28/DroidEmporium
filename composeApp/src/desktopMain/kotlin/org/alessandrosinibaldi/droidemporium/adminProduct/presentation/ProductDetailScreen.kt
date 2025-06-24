@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.seiko.imageloader.rememberImagePainter
 import kotlinx.datetime.toJavaInstant
+import org.alessandrosinibaldi.droidemporium.app.Route
 import org.alessandrosinibaldi.droidemporium.commonCategory.domain.Category
 import org.alessandrosinibaldi.droidemporium.commonOrder.domain.Order
 import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
@@ -54,6 +56,11 @@ fun ProductDetailScreen(
     val reviews by viewModel.reviews.collectAsState()
     val orders by viewModel.orders.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val onNavigateToEdit = {
+        if (productId != null) {
+            navController.navigate(Route.ProductEdit(productId = productId))
+        }
+    }
 
     ProductDetailScreenContent(
         product = product,
@@ -61,7 +68,8 @@ fun ProductDetailScreen(
         reviews = reviews,
         orders = orders,
         isLoading = isLoading,
-        onNavigateBack = { navController.popBackStack() }
+        onNavigateBack = { navController.popBackStack() },
+        onNavigateToEdit = onNavigateToEdit
     )
 }
 
@@ -72,7 +80,8 @@ fun ProductDetailScreenContent(
     reviews: List<Review>,
     orders: List<Order>,
     isLoading: Boolean,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToEdit: () -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -98,7 +107,21 @@ fun ProductDetailScreenContent(
 
 
             Column(modifier = Modifier.padding(24.dp)) {
-                MenuReturnButton(onNavigateBack)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    MenuReturnButton(onNavigateBack)
+                    Button(onClick = onNavigateToEdit) {
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription = "Edit Product",
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                        Text("Edit Product")
+                    }
+                }
                 Spacer(Modifier.height(16.dp))
 
                 Row(
