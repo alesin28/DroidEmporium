@@ -2,6 +2,8 @@ package org.alessandrosinibaldi.droidemporium.adminReview.data
 
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.firestore.firestore
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import org.alessandrosinibaldi.droidemporium.adminReview.domain.AdminReviewRepository
 import org.alessandrosinibaldi.droidemporium.commonReview.data.dto.ReviewDto
 import org.alessandrosinibaldi.droidemporium.commonReview.data.dto.toDomain
@@ -12,15 +14,15 @@ class AdminFirestoreReviewRepository: AdminReviewRepository {
     private val firestore = Firebase.firestore
     private val reviewsCollection = firestore.collection("reviews")
 
-    override suspend fun getAllReviews(): Result<List<Review>> {
-        return try {
+    override fun getAllReviews(): Flow<Result<List<Review>>> = flow {
+        try {
             val querySnapshot = reviewsCollection.get()
             val reviews = querySnapshot.documents.map { doc ->
                 doc.data<ReviewDto>().toDomain(id = doc.id)
             }
-            Result.Success(reviews)
+            emit(Result.Success(reviews))
         } catch (e: Exception) {
-            Result.Failure(e)
+            emit(Result.Failure(e))
         }
     }
 

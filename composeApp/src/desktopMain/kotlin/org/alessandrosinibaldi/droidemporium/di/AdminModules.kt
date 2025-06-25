@@ -100,6 +100,7 @@ val desktopAppModule = module {
         ProductListViewModel(
             adminProductRepository = get(),
             categoryRepository = get(),
+            adminReviewRepository = get(),
         )
     }
 

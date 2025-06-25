@@ -48,6 +48,9 @@ fun OrderDetailScreen(
         onNavigateBack = { navController.popBackStack() },
         onProductClick = { productId ->
             navController.navigate(Route.ProductDetail(productId = productId))
+        },
+        onClientClick = { clientId ->
+            navController.navigate(Route.ClientDetail(clientId = clientId))
         }
     )
 }
@@ -58,7 +61,8 @@ fun OrderDetailScreenContent(
     client: Client?,
     isLoading: Boolean,
     onNavigateBack: () -> Unit,
-    onProductClick: (String) -> Unit
+    onProductClick: (String) -> Unit,
+    onClientClick: (String) -> Unit
 ) {
     val dateFormatter = remember { SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault()) }
 
@@ -113,8 +117,20 @@ fun OrderDetailScreenContent(
                                 HorizontalDivider()
                                 Text("Order ID: ${order.id}", style =  MaterialTheme.typography.bodyLarge)
                                 Text("Client", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text("Name: ${client?.displayName ?: order.clientName}", style = MaterialTheme.typography.bodyLarge)
-                                Text("ID: ${client?.id ?: order.clientId}", style = MaterialTheme.typography.bodyLarge)
+                                Text(
+                                    text = "Name: ${client?.displayName ?: order.clientName}",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.SemiBold,
+                                    modifier = Modifier.clickable { onClientClick(order.clientId) }
+                                )
+                                Text(
+                                    text = "ID: ${client?.id ?: order.clientId}",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.SemiBold,
+                                    modifier = Modifier.clickable { onClientClick(order.clientId) }
+                                )
                                 Text("Order Date", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Text(dateFormatter.format(Date.from(order.orderDate.toJavaInstant())), style = MaterialTheme.typography.bodyLarge)
                                 Spacer(Modifier.height(8.dp))
@@ -145,7 +161,6 @@ fun OrderDetailScreenContent(
                             }
                             HorizontalDivider(color = MaterialTheme.colorScheme.outline)
 
-                            // Lines
                             Column(modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
                                 order.lines.forEach { line ->
                                     Row(

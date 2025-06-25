@@ -21,8 +21,20 @@ fun AdminApp() {
 
     NavHost(
         navController = navController,
-        startDestination = Route.StartMenu
+        startDestination = Route.Login
     ) {
+
+        composable<Route.Login> {
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate(Route.StartMenu) {
+                        popUpTo(Route.Login) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
+        }
 
         composable<Route.StartMenu> {
             StartMenu(navController = navController)

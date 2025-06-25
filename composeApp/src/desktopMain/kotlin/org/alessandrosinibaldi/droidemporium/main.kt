@@ -6,7 +6,6 @@ import com.google.firebase.FirebasePlatform
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.FirebaseOptions
 import dev.gitlive.firebase.initialize
-import dev.gitlive.firebase.auth.auth
 import android.app.Application
 import dev.gitlive.firebase.app
 import kotlinx.coroutines.runBlocking
@@ -29,8 +28,8 @@ fun main() {
     var apiKey: String = properties.getProperty("apiKey")
     var appId: String = properties.getProperty("applicationId")
     var projectId: String? = properties.getProperty("projectId")
-    var adminEmail: String = properties.getProperty("adminEmail")
-    var adminPassword: String = properties.getProperty("adminPassword")
+    //var adminEmail: String = properties.getProperty("adminEmail")
+    //var adminPassword: String = properties.getProperty("adminPassword")
 
     runBlocking {
         try {
@@ -50,7 +49,7 @@ fun main() {
 
             Firebase.initialize(Application(), options)
             println("Initialized Project ID: ${Firebase.app.options.projectId}")
-            Firebase.auth.signInWithEmailAndPassword(adminEmail, adminPassword)
+            //Firebase.auth.signInWithEmailAndPassword(adminEmail, adminPassword)
         } catch (e: Exception) {
             e.printStackTrace()
         }

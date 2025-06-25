@@ -54,7 +54,7 @@ fun ProductScreen(
     viewModel: ProductListViewModel = koinViewModel(),
     navController: NavHostController
 ) {
-    val products by viewModel.products.collectAsState()
+    val productsWithRatings by viewModel.productsWithRatings.collectAsState()
     val categories by viewModel.categories.collectAsState()
     val selectedCategoryIds by viewModel.selectedCategoryIds.collectAsState()
     val minPrice by viewModel.minPriceFilter.collectAsState()
@@ -81,7 +81,7 @@ fun ProductScreen(
     }
 
     productScreenContent(
-        products = products,
+        productsWithRatings = productsWithRatings,
         categories = categories,
         selectedCategoryIds = selectedCategoryIds,
         minPrice = minPrice,
@@ -91,7 +91,7 @@ fun ProductScreen(
         active = active,
         inactive = inactive,
         query = query,
-        deleteProduct = viewModel::changeProductStatus,
+        changeProductStatus = viewModel::changeProductStatus,
         onNavigateToAddProduct = onNavigateToAddProduct,
         onNavigateToEditProduct = onNavigateToEditProduct,
         onNavigateToProductDetail = onNavigateToProductDetail,
@@ -113,7 +113,7 @@ fun ProductScreen(
 
 @Composable
 fun productScreenContent(
-    products: List<Product>,
+    productsWithRatings: List<ProductListViewModel.ProductWithAverageRating>,
     categories: List<Category>,
     selectedCategoryIds: Set<String>,
     minPrice: Double?,
@@ -123,7 +123,7 @@ fun productScreenContent(
     active: Boolean,
     inactive: Boolean,
     query: String,
-    deleteProduct: (Product) -> Unit,
+    changeProductStatus: (Product) -> Unit,
     onNavigateToAddProduct: () -> Unit,
     onNavigateToEditProduct: (String) -> Unit,
     onNavigateToProductDetail: (String) -> Unit,
@@ -140,10 +140,11 @@ fun productScreenContent(
     sortDirection: SortDirection,
     onNavigateBack: () -> Unit
 ) {
-    val nameWeight = 3f
+    val nameWeight = 2.5f
     val categoryWeight = 1.5f
     val priceWeight = 1f
     val stockWeight = 1f
+    val ratingWeight = 1f
     val activeWeight = 1f
     val actionsWeight = 1.5f
 
@@ -156,8 +157,10 @@ fun productScreenContent(
     var minStockInput by remember { mutableStateOf(minStock?.toString() ?: "") }
     var maxStockInput by remember { mutableStateOf(maxStock?.toString() ?: "") }
 
-    LaunchedEffect(products) {
-        listState.scrollToItem(index = 0)
+    LaunchedEffect(productsWithRatings) {
+        if (listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 0) {
+            listState.scrollToItem(index = 0)
+        }
     }
 
     LaunchedEffect(minPrice) { minPriceInput = minPrice?.toString() ?: "" }
@@ -169,7 +172,7 @@ fun productScreenContent(
         ChangeStatusConfirmationDialog(
             product = product,
             onConfirm = {
-                deleteProduct(product)
+                changeProductStatus(product)
                 productForStatusChange = null
             },
             onDismiss = {
@@ -215,7 +218,7 @@ fun productScreenContent(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)) // Nicer corners
+                        .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
                         .background(color = MaterialTheme.colorScheme.surfaceVariant)
                         .padding(horizontal = 8.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -242,22 +245,31 @@ fun productScreenContent(
                         sortColumn == SortColumn.STOCK,
                         sortDirection
                     ) { onSortClick(SortColumn.STOCK) }
+                    TableHeader(
+                        "Rating",
+                        ratingWeight,
+                        true,
+                        sortColumn == SortColumn.AVERAGE_RATING,
+                        sortDirection
+                    ) { onSortClick(SortColumn.AVERAGE_RATING) }
                     TableHeader("Status", activeWeight, false)
                     TableHeader("Actions", actionsWeight, false, alignment = TextAlign.Center)
                 }
                 HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
 
-                if (products.isNotEmpty()) {
+                if (productsWithRatings.isNotEmpty()) {
                     LazyColumn(
                         modifier = Modifier.background(MaterialTheme.colorScheme.surface),
                         state = listState
                     ) {
-                        items(products, key = { it.id }) { product ->
-                            val category = categories.find { it.id == product.categoryId }
+                        items(productsWithRatings, key = { it.product.id }) { productWithRating ->
+                            val category =
+                                categories.find { it.id == productWithRating.product.categoryId }
                             if (category != null) {
                                 ProductItem(
-                                    product = product,
+                                    product = productWithRating.product,
                                     category = category,
+                                    averageRating = productWithRating.averageRating,
                                     onStatusChangeRequest = { productForStatusChange = it },
                                     editProduct = onNavigateToEditProduct,
                                     onNavigateToProductDetail = onNavigateToProductDetail,
@@ -266,6 +278,7 @@ fun productScreenContent(
                                         categoryWeight,
                                         priceWeight,
                                         stockWeight,
+                                        ratingWeight,
                                         activeWeight,
                                         actionsWeight
                                     )
@@ -309,7 +322,7 @@ fun productScreenContent(
                     }
 
                     item {
-                        Text("Price Range", style = MaterialTheme.typography.titleSmall)
+                        Text("Price Range (€)", style = MaterialTheme.typography.titleSmall)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             OutlinedTextField(
                                 value = minPriceInput,

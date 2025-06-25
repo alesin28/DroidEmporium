@@ -19,16 +19,24 @@ import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
 import kotlinx.coroutines.flow.map
 import org.alessandrosinibaldi.droidemporium.adminProduct.domain.AdminProductRepository
+import org.alessandrosinibaldi.droidemporium.adminReview.domain.AdminReviewRepository
 import org.alessandrosinibaldi.droidemporium.commonCategory.domain.CategoryRepository
+import org.alessandrosinibaldi.droidemporium.commonReview.domain.Review
+import kotlin.math.roundToInt
 
 class ProductListViewModel(
     private val adminProductRepository: AdminProductRepository,
     private val categoryRepository: CategoryRepository,
+    private val adminReviewRepository: AdminReviewRepository
+) : ViewModel() {
 
-    ) : ViewModel() {
+    data class ProductWithAverageRating(
+        val product: Product,
+        val averageRating: Double
+    )
 
     enum class SortColumn {
-        NAME, PRICE, STOCK, NONE
+        NAME, PRICE, STOCK, AVERAGE_RATING, NONE
     }
 
     enum class SortDirection {
@@ -63,6 +71,7 @@ class ProductListViewModel(
 
     private val _selectedCategoryIds = MutableStateFlow<Set<String>>(emptySet())
     val selectedCategoryIds = _selectedCategoryIds.asStateFlow()
+
 
     private val sortStateFlow: Flow<SortState> = combine(
         _sortColumn,
@@ -100,16 +109,29 @@ class ProductListViewModel(
         )
     }
 
+    private val reviewsFlow: StateFlow<List<Review>> = adminReviewRepository.getAllReviews()
+        .map { result ->
+            when (result) {
+                is Result.Success -> result.data
+                is Result.Failure -> {
+                    println("Error fetching reviews: ${result.exception.message}")
+                    emptyList()
+                }
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
-    //private val _products = MutableStateFlow<List<Product>>(emptyList())
+
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-    val products: StateFlow<List<Product>> = run {
-        val productsSourceFlow: Flow<Result<List<Product>>> = _searchQuery
+    val productsWithRatings: StateFlow<List<ProductWithAverageRating>> = run {
+        val productsSourceFlow: Flow<List<Product>> = _searchQuery
             .debounce(300L)
             .flatMapLatest { productQuery ->
                 adminProductRepository.searchProducts(productQuery)
             }
-        val unwrappedProductsFlow: Flow<List<Product>> = productsSourceFlow
             .map { result ->
                 when (result) {
                     is Result.Success -> result.data
@@ -119,42 +141,18 @@ class ProductListViewModel(
                     }
                 }
             }
+
         combine(
-            unwrappedProductsFlow,
+            productsSourceFlow,
+            reviewsFlow,
             sortStateFlow,
             filterStateFlow,
             activeFilterStateFlow
-        ) { productsList, sortState, filterState, activeFilterState ->
+        ) { productsList, reviewsList, sortState, filterState, activeFilterState ->
 
-            val sortedList = when (sortState.sortColumn) {
-                SortColumn.NAME -> {
-                    if (sortState.sortDirection == SortDirection.ASCENDING) {
-                        productsList.sortedBy { it.name }
-                    } else {
-                        productsList.sortedByDescending { it.name }
-                    }
-                }
+            val reviewsByProductId = reviewsList.groupBy { it.productId }
 
-                SortColumn.PRICE -> {
-                    if (sortState.sortDirection == SortDirection.ASCENDING) {
-                        productsList.sortedBy { it.price }
-                    } else {
-                        productsList.sortedByDescending { it.price }
-                    }
-                }
-
-                SortColumn.STOCK -> {
-                    if (sortState.sortDirection == SortDirection.ASCENDING) {
-                        productsList.sortedBy { it.stock }
-                    } else {
-                        productsList.sortedByDescending { it.stock }
-                    }
-                }
-
-                SortColumn.NONE -> productsList
-            }
-
-            sortedList.filter { product ->
+            val filteredAndRatedList = productsList.filter { product ->
                 val priceMatch =
                     (filterState.minPrice == null || product.price >= filterState.minPrice) &&
                             (filterState.maxPrice == null || product.price <= filterState.maxPrice)
@@ -175,6 +173,51 @@ class ProductListViewModel(
                     filterState.selectedCategories.contains(product.categoryId)
                 }
                 priceMatch && stockMatch && statusMatch && categoryMatch
+            }.map { product ->
+                val productReviews = reviewsByProductId[product.id] ?: emptyList()
+                val averageRating = if (productReviews.isNotEmpty()) {
+                    productReviews.sumOf { it.rating }.toDouble() / productReviews.size
+                } else {
+                    0.0
+                }
+                val roundedRating = (averageRating * 10).roundToInt() / 10.0
+
+                ProductWithAverageRating(
+                    product = product,
+                    averageRating = roundedRating
+                )
+            }
+
+            when (sortState.sortColumn) {
+                SortColumn.NAME -> {
+                    if (sortState.sortDirection == SortDirection.ASCENDING) {
+                        filteredAndRatedList.sortedBy { it.product.name }
+                    } else {
+                        filteredAndRatedList.sortedByDescending { it.product.name }
+                    }
+                }
+                SortColumn.PRICE -> {
+                    if (sortState.sortDirection == SortDirection.ASCENDING) {
+                        filteredAndRatedList.sortedBy { it.product.price }
+                    } else {
+                        filteredAndRatedList.sortedByDescending { it.product.price }
+                    }
+                }
+                SortColumn.STOCK -> {
+                    if (sortState.sortDirection == SortDirection.ASCENDING) {
+                        filteredAndRatedList.sortedBy { it.product.stock }
+                    } else {
+                        filteredAndRatedList.sortedByDescending { it.product.stock }
+                    }
+                }
+                SortColumn.AVERAGE_RATING -> {
+                    if (sortState.sortDirection == SortDirection.ASCENDING) {
+                        filteredAndRatedList.sortedBy { it.averageRating }
+                    } else {
+                        filteredAndRatedList.sortedByDescending { it.averageRating }
+                    }
+                }
+                SortColumn.NONE -> filteredAndRatedList
             }
         }.stateIn(
             scope = viewModelScope,
@@ -183,15 +226,11 @@ class ProductListViewModel(
         )
     }
 
-
     val categories: StateFlow<List<Category>> = categoryRepository
         .searchCategories("")
         .map { result ->
             when (result) {
-                is Result.Success -> {
-                    result.data
-                }
-
+                is Result.Success -> result.data
                 is Result.Failure -> {
                     println("Error fetching categories for filter list: ${result.exception.message}")
                     emptyList()
@@ -271,6 +310,7 @@ class ProductListViewModel(
         _selectedCategoryIds.value = newSelection
     }
 
+
     data class SortState(
         val sortColumn: SortColumn,
         val sortDirection: SortDirection
@@ -290,4 +330,3 @@ class ProductListViewModel(
     )
 
 }
-

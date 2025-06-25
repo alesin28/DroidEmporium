@@ -16,25 +16,29 @@ import org.alessandrosinibaldi.droidemporium.commonCategory.domain.Category
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.text.font.FontWeight
+import org.alessandrosinibaldi.droidemporium.ui.theme.AccentOrange
 import org.alessandrosinibaldi.droidemporium.ui.theme.SuccessGreen
 
 data class ProductItemWeights(
     val name: Float, val category: Float, val price: Float,
-    val stock: Float, val active: Float, val actions: Float
+    val stock: Float, val rating: Float, val active: Float, val actions: Float
 )
 
 @Composable
 fun ProductItem(
     product: Product,
     category: Category,
+    averageRating: Double,
     onStatusChangeRequest: (Product) -> Unit,
     editProduct: (String) -> Unit,
     onNavigateToProductDetail: (String) -> Unit,
@@ -60,7 +64,7 @@ fun ProductItem(
         )
         Text(
             modifier = Modifier.weight(weights.price).padding(horizontal = 8.dp),
-            text = "€${product.price}", maxLines = 1,
+            text = "€${"%.2f".format(product.price)}", maxLines = 1,
             style = MaterialTheme.typography.bodyMedium
         )
         Text(
@@ -69,11 +73,41 @@ fun ProductItem(
             style = MaterialTheme.typography.bodyMedium,
             color = if (product.stock < 10) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
         )
+
+        Row(
+            modifier = Modifier.weight(weights.rating).padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (averageRating > 0) {
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = "Rating",
+                    tint = AccentOrange,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    text = "%.1f".format(averageRating),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = AccentOrange
+                )
+            } else {
+                Text(
+                    text = "N/A",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+        }
+
         Text(
             modifier = Modifier.weight(weights.active).padding(horizontal = 8.dp),
             text = if (product.isActive) "Active" else "Inactive", maxLines = 1,
             style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
-            color = if (product.isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            color = if (product.isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(
+                alpha = 0.6f
+            )
         )
         Row(
             modifier = Modifier.weight(weights.actions),
@@ -81,7 +115,11 @@ fun ProductItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = { editProduct(product.id) }) {
-                Icon(Icons.Default.Edit, contentDescription = "Edit Product", tint = MaterialTheme.colorScheme.secondary)
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = "Edit Product",
+                    tint = MaterialTheme.colorScheme.secondary
+                )
             }
             Spacer(Modifier.width(8.dp))
             IconButton(onClick = { onStatusChangeRequest(product) }) {
