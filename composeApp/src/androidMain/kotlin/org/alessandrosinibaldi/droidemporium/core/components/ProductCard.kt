@@ -1,4 +1,4 @@
-package org.alessandrosinibaldi.droidemporium.home.components
+package org.alessandrosinibaldi.droidemporium.core.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -26,32 +26,33 @@ fun ProductCard(
 ) {
     Card(
         onClick = { onProductClick(product.id) },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.Companion.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column {
-            val imageUrl = "https://res.cloudinary.com/dovupsygm/image/upload/w_400,c_fill/${product.defaultImageId}"
+            val imageUrl =
+                "https://res.cloudinary.com/dovupsygm/image/upload/w_400,c_fill/${product.defaultImageId}"
             Image(
                 painter = rememberImagePainter(imageUrl),
                 contentDescription = product.name,
-                modifier = Modifier
+                modifier = Modifier.Companion
                     .fillMaxWidth()
                     .aspectRatio(1f),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Companion.Crop
             )
 
             Column(
-                modifier = Modifier.padding(12.dp),
+                modifier = Modifier.Companion.padding(12.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
                     text = product.name,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Companion.Bold,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                    overflow = TextOverflow.Companion.Ellipsis,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(

@@ -7,5 +7,7 @@ import org.alessandrosinibaldi.droidemporium.core.domain.Result
 
 interface ClientProductRepository: ProductRepository {
     fun getNewestProducts(limit: Int): Flow<Result<List<Product>>>
+    fun getProductsByCategory(categoryId: String): Flow<Result<List<Product>>>
+
 
 }

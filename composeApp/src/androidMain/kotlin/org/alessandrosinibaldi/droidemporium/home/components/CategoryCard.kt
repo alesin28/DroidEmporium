@@ -21,10 +21,10 @@ import androidx.compose.ui.text.style.TextAlign
 @Composable
 fun CategoryCard(
     category: Category,
-    onCategoryClick: (String) -> Unit
+    onCategoryClick: () -> Unit
 ) {
     Card(
-        onClick = { onCategoryClick(category.id) },
+        onClick = onCategoryClick,
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1.5f),

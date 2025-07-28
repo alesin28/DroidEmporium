@@ -2,69 +2,56 @@ package org.alessandrosinibaldi.droidemporium.home.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import org.alessandrosinibaldi.droidemporium.androidProduct.domain.ClientProductRepository
 import org.alessandrosinibaldi.droidemporium.commonCategory.domain.Category
 import org.alessandrosinibaldi.droidemporium.commonCategory.domain.CategoryRepository
 import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
 
+data class HomeScreenState(
+    val isLoading: Boolean = true,
+    val categories: List<Category> = emptyList(),
+    val newProducts: List<Product> = emptyList(),
+    val error: String? = null
+)
 
 class HomeViewModel(
-    private val clientProductRepository: ClientProductRepository,
-    private val categoryRepository: CategoryRepository
+    clientProductRepository: ClientProductRepository,
+    categoryRepository: CategoryRepository
 ) : ViewModel() {
 
-    private val _isLoading = MutableStateFlow(true)
-    val isLoading = _isLoading.asStateFlow()
-
-    private val _categories = MutableStateFlow<List<Category>>(emptyList())
-    val categories = _categories.asStateFlow()
-
-    private val _newArrivals = MutableStateFlow<List<Product>>(emptyList())
-    val newArrivals = _newArrivals.asStateFlow()
-
-    init {
-        loadCategories()
-        loadNewArrivals()
-    }
-
-    private fun loadCategories() {
-        categoryRepository.searchCategories("")
-            .onEach { result ->
-                when (result) {
-                    is Result.Success -> {
-                        _categories.value = result.data
-                    }
-                    is Result.Failure -> {
-                        val errorMessage = "Failed to load categories"
-                        println("$errorMessage: ${result.exception.message}")
-                    }
-                }
-                if (_isLoading.value) {
-                    _isLoading.value = false
-                }
-            }
-            .launchIn(viewModelScope)
-    }
-
-    private fun loadNewArrivals() {
+    val uiState: StateFlow<HomeScreenState> = combine(
+        categoryRepository.searchCategories(""),
         clientProductRepository.getNewestProducts(limit = 10)
-            .onEach { result ->
-                when (result) {
-                    is Result.Success -> {
-                        _newArrivals.value = result.data
-                    }
-                    is Result.Failure -> {
-                        val errorMessage = "Failed to load new arrivals"
-                        println("$errorMessage: ${result.exception.message}")
-                    }
-                }
-            }
-            .launchIn(viewModelScope)
-    }
+    ) { categoriesResult, newProductsResult ->
 
+        val categories = when (categoriesResult) {
+            is Result.Success -> categoriesResult.data
+            is Result.Failure -> emptyList()
+        }
+
+        val newProducts = when (newProductsResult) {
+            is Result.Success -> newProductsResult.data
+            is Result.Failure -> emptyList()
+        }
+
+        val errorMessage = if (categoriesResult is Result.Failure || newProductsResult is Result.Failure) {
+            "Failed to load home screen data."
+        } else null
+
+        HomeScreenState(
+            isLoading = false,
+            categories = categories,
+            newProducts = newProducts,
+            error = errorMessage
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = HomeScreenState(isLoading = true)
+    )
 }

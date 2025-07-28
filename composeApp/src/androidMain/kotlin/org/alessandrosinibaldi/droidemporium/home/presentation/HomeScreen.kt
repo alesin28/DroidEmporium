@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,39 +36,63 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import org.alessandrosinibaldi.droidemporium.app.Route
 import org.alessandrosinibaldi.droidemporium.commonCategory.domain.Category
 import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
+import org.alessandrosinibaldi.droidemporium.core.components.ProductCard
+import org.alessandrosinibaldi.droidemporium.core.components.SearchBar
 import org.alessandrosinibaldi.droidemporium.home.components.CategoryCard
-import org.alessandrosinibaldi.droidemporium.home.components.ProductCard
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
     navController: NavHostController
-
 ) {
-    val isLoading by viewModel.isLoading.collectAsState()
-    val categories by viewModel.categories.collectAsState()
-    val newProducts by viewModel.newArrivals.collectAsState()
+    val state by viewModel.uiState.collectAsState()
 
-    val onCategoryClick: (String) -> Unit = { categoryId ->
+
+    val onCategoryClick: (Category) -> Unit = { category ->
+        navController.navigate(
+            Route.ProductList(
+                categoryId = category.id,
+                categoryName = category.name,
+                showNewest = false,
+                query = null,
+                startSearch = false
+            )
+        )
     }
-    val onProductClick: (String) -> Unit = { productId ->
+
+    val onSearchClick: (String) -> Unit = { query ->
+        navController.navigate(
+            Route.ProductList(
+                categoryId = null,
+                categoryName = null,
+                showNewest = false,
+                query = query,
+                startSearch = true
+            )
+        )
     }
-    val onSearchClick: () -> Unit = {
+
+    val onSeeAllNewestClick: () -> Unit = {
+        navController.navigate(
+            Route.ProductList(showNewest = true)
+        )
     }
-    val onCartClick: () -> Unit = {
-    }
+    val onProductClick: (String) -> Unit = {}
+    val onCartClick: () -> Unit = { }
 
     HomeScreenContent(
-        isLoading = isLoading,
-        categories = categories,
-        newProducts = newProducts,
+        isLoading = state.isLoading,
+        categories = state.categories,
+        newProducts = state.newProducts,
         onCategoryClick = onCategoryClick,
         onProductClick = onProductClick,
         onSearchClick = onSearchClick,
-        onCartClick = onCartClick
+        onCartClick = onCartClick,
+        onSeeAllNewestClick = onSeeAllNewestClick
     )
 }
 
@@ -79,22 +102,22 @@ fun HomeScreenContent(
     isLoading: Boolean,
     categories: List<Category>,
     newProducts: List<Product>,
-    onCategoryClick: (String) -> Unit,
+    onCategoryClick: (Category) -> Unit,
     onProductClick: (String) -> Unit,
-    onSearchClick: () -> Unit,
-    onCartClick: () -> Unit
+    onSearchClick: (String) -> Unit,
+    onCartClick: () -> Unit,
+    onSeeAllNewestClick: () -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("DroidEmporium") },
+                title = {
+                    SearchBar(onSearchClicked = onSearchClick)
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 ),
                 actions = {
-                    IconButton(onClick = onSearchClick) {
-                        Icon(Icons.Default.Search, contentDescription = "Search Products")
-                    }
                     IconButton(onClick = onCartClick) {
                         Icon(Icons.Default.ShoppingCart, contentDescription = "View Cart")
                     }
@@ -133,7 +156,7 @@ fun HomeScreenContent(
                             items(categories, key = { it.id }) { category ->
                                 CategoryCard(
                                     category = category,
-                                    onCategoryClick = onCategoryClick
+                                    onCategoryClick = { onCategoryClick(category) }
                                 )
                             }
                         }
@@ -152,7 +175,7 @@ fun HomeScreenContent(
                                 style = MaterialTheme.typography.headlineSmall,
                                 color = MaterialTheme.colorScheme.onBackground
                             )
-                            TextButton(onClick = {}) {
+                            TextButton(onClick = onSeeAllNewestClick) {
                                 Text("See All")
                             }
                         }

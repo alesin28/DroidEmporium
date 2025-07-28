@@ -11,9 +11,12 @@ import org.alessandrosinibaldi.droidemporium.commonCategory.data.FirestoreCatego
 import org.alessandrosinibaldi.droidemporium.commonCategory.domain.CategoryRepository
 import org.alessandrosinibaldi.droidemporium.home.presentation.HomeViewModel
 import org.koin.core.module.dsl.singleOf
+import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
+import org.alessandrosinibaldi.droidemporium.androidProduct.presentation.ProductListViewModel
+
 
 val androidAppModule = module {
 
@@ -24,4 +27,15 @@ val androidAppModule = module {
 
     viewModelOf(::AuthViewModel)
     viewModelOf(::HomeViewModel)
+
+    viewModel { params ->
+        ProductListViewModel(
+            categoryId = params.get(0),
+            categoryName = params.get(1),
+            showNewest = params.get(2),
+            initialQuery = params.get(3),
+            clientProductRepository = get(),
+            categoryRepository = get()
+        )
+    }
 }
