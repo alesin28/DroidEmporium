@@ -1,5 +1,7 @@
 package org.alessandrosinibaldi.droidemporium.commonProduct.data.dto
 
+import dev.gitlive.firebase.firestore.Timestamp
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
 
@@ -13,7 +15,8 @@ data class ProductDto(
     val isActive: Boolean = true,
     val categoryId: String = "",
     val imageIds: List<String> = emptyList(),
-    val defaultImageId: String = ""
+    val defaultImageId: String = "",
+    val createdAt: Timestamp? = null
 )
 
 fun ProductDto.toDomain(id: String): Product {
@@ -26,6 +29,13 @@ fun ProductDto.toDomain(id: String): Product {
         isActive = this.isActive,
         categoryId = this.categoryId,
         imageIds = this.imageIds,
-        defaultImageId = this.defaultImageId
+        defaultImageId = this.defaultImageId,
+        createdAt = this.createdAt?.toInstant() ?: Instant.DISTANT_PAST
     )
+
+
+}
+
+private fun Timestamp.toInstant(): Instant {
+    return Instant.fromEpochSeconds(this.seconds, this.nanoseconds)
 }

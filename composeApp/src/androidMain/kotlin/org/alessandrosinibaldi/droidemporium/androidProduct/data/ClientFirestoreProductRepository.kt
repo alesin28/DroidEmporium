@@ -1,31 +1,34 @@
 package org.alessandrosinibaldi.droidemporium.androidProduct.data
 
 import dev.gitlive.firebase.Firebase
+import dev.gitlive.firebase.firestore.Direction
 import dev.gitlive.firebase.firestore.firestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.alessandrosinibaldi.droidemporium.androidProduct.domain.ClientProductRepository
 import org.alessandrosinibaldi.droidemporium.commonProduct.data.dto.ProductDto
 import org.alessandrosinibaldi.droidemporium.commonProduct.data.dto.toDomain
 import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
-import org.alessandrosinibaldi.droidemporium.commonProduct.domain.ProductRepository
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
 
-class ClientFirestoreProductRepository : ProductRepository {
+
+class ClientFirestoreProductRepository : ClientProductRepository {
     private val firestore = Firebase.firestore
     private val productsCollection = firestore.collection("products")
 
     override fun searchProducts(query: String): Flow<Result<List<Product>>> = flow {
         try {
-            productsCollection.snapshots.collect { querySnapshot ->
-                val allProducts = querySnapshot.documents.map { documentSnapshot ->
+            val activeProductsQuery = productsCollection.where { "isActive" equalTo true }
+            activeProductsQuery.snapshots.collect { querySnapshot ->
+                val allActiveProducts = querySnapshot.documents.map { documentSnapshot ->
                     val dto = documentSnapshot.data<ProductDto>()
                     dto.toDomain(id = documentSnapshot.id)
                 }
                 val filteredList = if (query.isBlank()) {
-                    allProducts
+                    allActiveProducts
                 } else {
                     val lowerCaseQuery = query.lowercase()
-                    allProducts.filter { product ->
+                    allActiveProducts.filter { product ->
                         product.name.lowercase().contains(lowerCaseQuery)
                     }
                 }
@@ -39,11 +42,14 @@ class ClientFirestoreProductRepository : ProductRepository {
     override suspend fun getProductById(id: String): Result<Product?> {
         return try {
             val snapshot = productsCollection.document(id).get()
-
             if (snapshot.exists) {
                 val dto = snapshot.data<ProductDto>()
-                val product = dto.toDomain(id = snapshot.id)
-                Result.Success(product)
+                if (dto.isActive) {
+                    val product = dto.toDomain(id = snapshot.id)
+                    Result.Success(product)
+                } else {
+                    Result.Success(null)
+                }
             } else {
                 Result.Success(null)
             }
@@ -52,5 +58,23 @@ class ClientFirestoreProductRepository : ProductRepository {
         }
     }
 
+
+    override fun getNewestProducts(limit: Int): Flow<Result<List<Product>>> = flow {
+        try {
+            productsCollection
+                .where { "isActive" equalTo true }
+                .orderBy("createdAt", Direction.DESCENDING)
+                .limit(limit.toLong())
+                .snapshots.collect { querySnapshot ->
+                    val products = querySnapshot.documents.map { documentSnapshot ->
+                        val dto = documentSnapshot.data<ProductDto>()
+                        dto.toDomain(id = documentSnapshot.id)
+                    }
+                    emit(Result.Success(products))
+                }
+        } catch (e: Exception) {
+            emit(Result.Failure(e))
+        }
+    }
 
 }

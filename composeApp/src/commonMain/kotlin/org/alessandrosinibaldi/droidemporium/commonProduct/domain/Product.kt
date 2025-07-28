@@ -1,5 +1,7 @@
 package org.alessandrosinibaldi.droidemporium.commonProduct.domain
 
+import kotlinx.datetime.Instant
+
 data class Product(
     val id: String,
     val name: String,
@@ -9,5 +11,6 @@ data class Product(
     val isActive: Boolean,
     val categoryId: String,
     val imageIds: List<String>,
-    val defaultImageId: String
+    val defaultImageId: String,
+    val createdAt: Instant
 )
