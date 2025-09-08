@@ -130,7 +130,9 @@ fun ProductListScreenContent(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(products, key = { it.id }) { product ->
-                    ProductCard(product = product, onProductClick = { /* TODO */ })
+                    ProductCard(
+                        product = product,
+                        onProductClick = { productId -> navController.navigate(Route.ProductDetail(productId = productId))})
                 }
             }
         }

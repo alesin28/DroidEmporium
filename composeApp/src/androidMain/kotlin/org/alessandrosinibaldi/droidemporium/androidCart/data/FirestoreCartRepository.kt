@@ -6,15 +6,15 @@ import dev.gitlive.firebase.firestore.Timestamp
 import dev.gitlive.firebase.firestore.firestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.alessandrosinibaldi.droidemporium.androidProduct.domain.ClientProductRepository
 import org.alessandrosinibaldi.droidemporium.commonCart.data.dto.CartItemDto
 import org.alessandrosinibaldi.droidemporium.commonCart.data.dto.toDomain
 import org.alessandrosinibaldi.droidemporium.commonCart.domain.CartItem
 import org.alessandrosinibaldi.droidemporium.commonCart.domain.CartRepository
-import org.alessandrosinibaldi.droidemporium.commonProduct.domain.ProductRepository
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
 
 class FirestoreCartRepository(
-    private val productRepository: ProductRepository
+    private val productRepository: ClientProductRepository
 ) : CartRepository
     {
         private val firestore = Firebase.firestore

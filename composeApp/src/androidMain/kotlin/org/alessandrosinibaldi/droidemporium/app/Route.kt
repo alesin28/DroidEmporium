@@ -14,8 +14,13 @@ sealed class Route(val path: String) {
         val categoryName: String? = null,
         val showNewest: Boolean = false,
         val startSearch: Boolean = false,
-        val query : String? = null
+        val query: String? = null
 
     ) : Route("product_list")
+
+    @Serializable
+    data class ProductDetail(
+        val productId: String
+    ) : Route("product_detail/{productId}")
 
 }
