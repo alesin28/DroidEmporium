@@ -27,6 +27,16 @@ data class LoginUiState(
     val loginSuccess: Boolean = false
 )
 
+data class SignupUiState(
+    val displayName: String = "",
+    val email: String = "",
+    val phoneNumber: String = "",
+    val password: String = "",
+    val confirmPassword: String = "",
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val signupSuccess: Boolean = false
+)
 
 class AuthViewModel(
     private val authRepository: AuthRepository
@@ -79,6 +89,7 @@ class AuthViewModel(
                         )
                     }
                 }
+
                 is Result.Failure -> {
                     _uiState.update {
                         it.copy(
@@ -99,8 +110,106 @@ class AuthViewModel(
     }
 
 
-
     fun onLoginSuccessNavigated() {
         _uiState.update { it.copy(loginSuccess = false) }
     }
+
+    private val _signupUiState = MutableStateFlow(SignupUiState())
+    val signupUiState = _signupUiState.asStateFlow()
+
+    fun onSignupDisplayNameChange(name: String) {
+        _signupUiState.update {
+            it.copy(
+                displayName = name,
+                error = null
+            )
+        }
+    }
+
+    fun onSignupEmailChange(email: String) {
+        _signupUiState.update {
+            it.copy(
+                email = email,
+                error = null
+            )
+        }
+    }
+
+    fun onSignupPhoneNumberChange(phone: String) {
+        _signupUiState.update {
+            it.copy(
+                phoneNumber = phone,
+                error = null
+            )
+        }
+    }
+
+    fun onSignupPasswordChange(password: String) {
+        _signupUiState.update {
+            it.copy(
+                password = password,
+                error = null
+            )
+        }
+    }
+
+    fun onSignupConfirmPasswordChange(password: String) {
+        _signupUiState.update {
+            it.copy(
+                confirmPassword = password,
+                error = null
+            )
+        }
+    }
+
+    fun signup() {
+        val state = _signupUiState.value
+
+        if (state.password != state.confirmPassword) {
+            _signupUiState.update { it.copy(error = "Passwords are not the same") }
+            return
+        }
+
+        viewModelScope.launch {
+            _signupUiState.update {
+                it.copy(
+                    isLoading = true,
+                    error = null
+                )
+            }
+
+            val result = authRepository.signup(
+                displayName = state.displayName.trim(),
+                email = state.email.trim(),
+                phoneNumber = state.phoneNumber.trim().takeIf { it.isNotEmpty() },
+                password = state.password
+            )
+
+            when (result) {
+                is Result.Success -> {
+                    _signupUiState.update {
+                        it.copy(
+                            isLoading = false,
+                            signupSuccess = true
+                        )
+                    }
+                }
+
+                is Result.Failure -> {
+                    _signupUiState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = result.exception.message ?: "An unknown signup error occurred."
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun onSignupSuccessNavigated() {
+        _signupUiState.update { it.copy(signupSuccess = false) }
+    }
+
+
 }

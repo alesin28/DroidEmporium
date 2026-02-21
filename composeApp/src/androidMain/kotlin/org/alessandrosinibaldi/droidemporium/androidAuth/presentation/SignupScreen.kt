@@ -12,16 +12,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
-fun LoginScreen(
+fun SignupScreen(
     viewModel: AuthViewModel,
-    onNavigateToSignup: () -> Unit
+    onNavigateToLogin: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.signupUiState.collectAsStateWithLifecycle()
 
-
-    LaunchedEffect(uiState.loginSuccess) {
-        if (uiState.loginSuccess) {
-            viewModel.onLoginSuccessNavigated()
+    LaunchedEffect(uiState.signupSuccess) {
+        if (uiState.signupSuccess) {
+            viewModel.onSignupSuccessNavigated()
         }
     }
 
@@ -31,9 +30,7 @@ fun LoginScreen(
             modifier = Modifier.fillMaxSize()
         ) {
             Card(
-                modifier = Modifier
-                    .width(350.dp)
-                    .padding(16.dp),
+                modifier = Modifier.width(350.dp).padding(16.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
@@ -42,12 +39,21 @@ fun LoginScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier.padding(32.dp)
                 ) {
-                    Text("Client Login", style = MaterialTheme.typography.headlineMedium)
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Create Account", style = MaterialTheme.typography.headlineMedium)
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedTextField(
+                        value = uiState.displayName,
+                        onValueChange = viewModel::onSignupDisplayNameChange,
+                        label = { Text("Display Name") },
+                        isError = uiState.error != null,
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
                     OutlinedTextField(
                         value = uiState.email,
-                        onValueChange = viewModel::onEmailChange,
+                        onValueChange = viewModel::onSignupEmailChange,
                         label = { Text("Email") },
                         isError = uiState.error != null,
                         singleLine = true,
@@ -55,9 +61,28 @@ fun LoginScreen(
                     )
 
                     OutlinedTextField(
+                        value = uiState.phoneNumber,
+                        onValueChange = viewModel::onSignupPhoneNumberChange,
+                        label = { Text("Phone Number (Optional)") },
+                        isError = uiState.error != null,
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
                         value = uiState.password,
-                        onValueChange = viewModel::onPasswordChange,
+                        onValueChange = viewModel::onSignupPasswordChange,
                         label = { Text("Password") },
+                        isError = uiState.error != null,
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = uiState.confirmPassword,
+                        onValueChange = viewModel::onSignupConfirmPasswordChange,
+                        label = { Text("Confirm Password") },
                         isError = uiState.error != null,
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
@@ -75,11 +100,9 @@ fun LoginScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Button(
-                        onClick = viewModel::login,
+                        onClick = viewModel::signup,
                         enabled = !uiState.isLoading,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
+                        modifier = Modifier.fillMaxWidth().height(48.dp)
                     ) {
                         if (uiState.isLoading) {
                             CircularProgressIndicator(
@@ -87,11 +110,12 @@ fun LoginScreen(
                                 color = MaterialTheme.colorScheme.onPrimary
                             )
                         } else {
-                            Text("Login")
+                            Text("Sign Up")
                         }
                     }
-                    TextButton(onClick = onNavigateToSignup) {
-                        Text("Sign up")
+
+                    TextButton(onClick = onNavigateToLogin) {
+                        Text("Login")
                     }
                 }
             }
