@@ -1,13 +1,14 @@
-package org.alessandrosinibaldi.droidemporium.adminOrder.data.dto
+package org.alessandrosinibaldi.droidemporium.commonOrder.data.dto
 
 import dev.gitlive.firebase.firestore.Timestamp
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import org.alessandrosinibaldi.droidemporium.commonAddress.data.dto.AddressDto
+import org.alessandrosinibaldi.droidemporium.commonAddress.data.dto.toDomain
 import org.alessandrosinibaldi.droidemporium.commonAddress.domain.Address
 import org.alessandrosinibaldi.droidemporium.commonOrder.domain.Order
 import org.alessandrosinibaldi.droidemporium.commonOrder.domain.OrderLine
-import org.alessandrosinibaldi.droidemporium.commonAddress.data.dto.toDomain
+import org.alessandrosinibaldi.droidemporium.core.utils.toInstant
 
 @Serializable
 data class OrderDto(
@@ -20,7 +21,17 @@ data class OrderDto(
 
 fun OrderDto.toDomain(id: String, lines: List<OrderLine>): Order {
     val domainAddress = this.address?.toDomain(id = "")
-        ?: Address(id="", label="N/A", name="N/A", surname="N/A", street="N/A", city="N/A", province="N/A", postalCode="N/A", country="N/A")
+        ?: Address(
+            id = "",
+            label = "N/A",
+            name = "N/A",
+            surname = "N/A",
+            street = "N/A",
+            city = "N/A",
+            province = "N/A",
+            postalCode = "N/A",
+            country = "N/A"
+        )
 
     return Order(
         id = id,
@@ -31,8 +42,4 @@ fun OrderDto.toDomain(id: String, lines: List<OrderLine>): Order {
         lines = lines,
         address = domainAddress
     )
-}
-
-private fun Timestamp.toInstant(): Instant {
-    return Instant.fromEpochSeconds(this.seconds, this.nanoseconds)
 }

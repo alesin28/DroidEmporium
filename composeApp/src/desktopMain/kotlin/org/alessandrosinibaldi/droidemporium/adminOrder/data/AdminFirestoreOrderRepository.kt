@@ -7,9 +7,9 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import org.alessandrosinibaldi.droidemporium.adminOrder.data.dto.OrderDto
-import org.alessandrosinibaldi.droidemporium.adminOrder.data.dto.OrderLineDto
-import org.alessandrosinibaldi.droidemporium.adminOrder.data.dto.toDomain
+import org.alessandrosinibaldi.droidemporium.commonOrder.data.dto.OrderDto
+import org.alessandrosinibaldi.droidemporium.commonOrder.data.dto.OrderLineDto
+import org.alessandrosinibaldi.droidemporium.commonOrder.data.dto.toDomain
 import org.alessandrosinibaldi.droidemporium.adminOrder.domain.AdminOrderRepository
 import org.alessandrosinibaldi.droidemporium.commonOrder.domain.Order
 import org.alessandrosinibaldi.droidemporium.core.domain.Result

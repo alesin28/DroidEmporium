@@ -1,8 +1,7 @@
-package org.alessandrosinibaldi.droidemporium.adminOrder.data.dto
+package org.alessandrosinibaldi.droidemporium.commonOrder.data.dto
 
 import kotlinx.serialization.Serializable
 import org.alessandrosinibaldi.droidemporium.commonOrder.domain.OrderLine
-
 
 @Serializable
 data class OrderLineDto(

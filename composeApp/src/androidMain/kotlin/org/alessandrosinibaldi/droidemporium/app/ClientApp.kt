@@ -9,6 +9,8 @@ import org.alessandrosinibaldi.droidemporium.androidProduct.presentation.Product
 import org.alessandrosinibaldi.droidemporium.home.presentation.HomeScreen
 import org.alessandrosinibaldi.droidemporium.androidProduct.presentation.ProductListScreen
 import org.alessandrosinibaldi.droidemporium.androidCart.presentation.CartScreen
+import org.alessandrosinibaldi.droidemporium.androidAddress.presentation.AddressFormScreen
+import org.alessandrosinibaldi.droidemporium.androidCart.presentation.CheckoutScreen
 
 @Composable
 fun ClientApp() {
@@ -45,9 +47,29 @@ fun ClientApp() {
             CartScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToCheckout = {
-                    /* TODO */
+                    navController.navigate(Route.Checkout)
                 })
+        }
 
+        composable<Route.Checkout> {
+            CheckoutScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToAddAddress = { navController.navigate(Route.AddressForm(null)) },
+                onNavigateToHome = {
+                    navController.navigate(Route.StartMenu) {
+                        popUpTo(Route.StartMenu) { inclusive = false }
+                    }
+                }
+
+            )
+        }
+
+        composable<Route.AddressForm> { backStackEntry ->
+            val args = backStackEntry.toRoute<Route.AddressForm>()
+            AddressFormScreen(
+                addressId = args.addressId,
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
 
     }

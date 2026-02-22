@@ -1,10 +1,14 @@
 package org.alessandrosinibaldi.droidemporium.di
 
+import org.alessandrosinibaldi.droidemporium.androidAddress.presentation.AddressFormViewModel
 import org.alessandrosinibaldi.droidemporium.androidAuth.data.FirestoreAuthRepository
 import org.alessandrosinibaldi.droidemporium.androidAuth.domain.AuthRepository
 import org.alessandrosinibaldi.droidemporium.androidAuth.presentation.AuthViewModel
 import org.alessandrosinibaldi.droidemporium.androidCart.data.FirestoreCartRepository
 import org.alessandrosinibaldi.droidemporium.androidCart.presentation.CartViewModel
+import org.alessandrosinibaldi.droidemporium.androidCart.presentation.CheckoutViewModel
+import org.alessandrosinibaldi.droidemporium.androidOrder.data.ClientFirestoreOrderRepository
+import org.alessandrosinibaldi.droidemporium.androidOrder.domain.ClientOrderRepository
 import org.alessandrosinibaldi.droidemporium.androidProduct.data.ClientFirestoreProductRepository
 import org.alessandrosinibaldi.droidemporium.androidProduct.domain.ClientProductRepository
 import org.alessandrosinibaldi.droidemporium.androidProduct.presentation.ProductDetailViewModel
@@ -20,6 +24,8 @@ import org.koin.dsl.module
 import org.alessandrosinibaldi.droidemporium.androidProduct.presentation.ProductListViewModel
 import org.alessandrosinibaldi.droidemporium.androidReview.data.ClientFirestoreReviewRepository
 import org.alessandrosinibaldi.droidemporium.commonReview.domain.ReviewRepository
+import org.alessandrosinibaldi.droidemporium.commonAddress.data.FirestoreAddressRepository
+import org.alessandrosinibaldi.droidemporium.commonAddress.domain.AddressRepository
 
 
 val androidAppModule = module {
@@ -29,12 +35,16 @@ val androidAppModule = module {
     singleOf(::FirestoreAuthRepository).bind<AuthRepository>()
     singleOf(::FirestoreCategoryRepository).bind<CategoryRepository>()
     singleOf(::ClientFirestoreReviewRepository).bind<ReviewRepository>()
+    singleOf(::FirestoreAddressRepository).bind<AddressRepository>()
+    singleOf(::ClientFirestoreOrderRepository).bind<ClientOrderRepository>()
+
 
 
 
     viewModelOf(::AuthViewModel)
     viewModelOf(::HomeViewModel)
     viewModelOf(::CartViewModel)
+    viewModelOf(::CheckoutViewModel)
 
 
     viewModel { params ->
@@ -57,4 +67,22 @@ val androidAppModule = module {
             authRepository = get()
         )
     }
+
+    viewModel { params ->
+        AddressFormViewModel(
+            addressRepository = get(),
+            authRepository = get(),
+            addressId = params.getOrNull()
+        )
+    }
+
+    viewModel {
+        CheckoutViewModel(
+            cartRepository = get(),
+            addressRepository = get(),
+            authRepository = get(),
+            orderRepository = get()
+        )
+    }
+
 }
