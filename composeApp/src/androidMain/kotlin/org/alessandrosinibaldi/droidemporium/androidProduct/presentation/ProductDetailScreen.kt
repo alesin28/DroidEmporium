@@ -43,6 +43,8 @@ fun ProductDetailScreen(
     val reviews by viewModel.reviews.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
+    val isAddingToCart by viewModel.isAddingToCart.collectAsState()
+    val cartMessage by viewModel.cartMessage.collectAsState()
 
     ProductDetailScreenContent(
         isLoading = isLoading,
@@ -50,6 +52,10 @@ fun ProductDetailScreen(
         categoryName = category?.name,
         reviews = reviews,
         error = error,
+        isAddingToCart = isAddingToCart,
+        cartMessage = cartMessage,
+        onAddToCart = viewModel::addToCart,
+        onCartMessageShown = viewModel::onCartMessageShown,
         onNavigateBack = { navController.popBackStack() }
     )
 }
@@ -62,9 +68,23 @@ private fun ProductDetailScreenContent(
     categoryName: String?,
     reviews: List<Review>,
     error: String?,
+    isAddingToCart: Boolean,
+    cartMessage: String?,
+    onAddToCart: () -> Unit,
+    onCartMessageShown: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(cartMessage) {
+        cartMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            onCartMessageShown()
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(product?.name ?: "") },
@@ -77,6 +97,48 @@ private fun ProductDetailScreenContent(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
             )
+        },
+        bottomBar = {
+            if (product != null && product.stock > 0) {
+                BottomAppBar(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 8.dp
+                ) {
+                    Button(
+                        onClick = onAddToCart,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .height(48.dp),
+                        enabled = !isAddingToCart
+                    ) {
+                        if (isAddingToCart) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        } else {
+                            Text("Add to Cart - €${"%.2f".format(product.price)}")
+                        }
+                    }
+                }
+            } else if (product != null && product.stock == 0) {
+                BottomAppBar(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Out of Stock",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
         }
     ) { paddingValues ->
         when {
@@ -85,11 +147,13 @@ private fun ProductDetailScreenContent(
                     CircularProgressIndicator()
                 }
             }
+
             error != null -> {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(text = error, color = MaterialTheme.colorScheme.error)
                 }
             }
+
             product != null -> {
                 LazyColumn(
                     modifier = Modifier
@@ -172,7 +236,8 @@ private fun ImageGallery(
     allImageIds: List<String>
 ) {
     var selectedImageId by remember(defaultImageId) { mutableStateOf(defaultImageId) }
-    val largeImageUrl = "https://res.cloudinary.com/dovupsygm/image/upload/w_800,c_fill/$selectedImageId"
+    val largeImageUrl =
+        "https://res.cloudinary.com/dovupsygm/image/upload/w_800,c_fill/$selectedImageId"
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Image(
@@ -208,13 +273,17 @@ private fun ThumbnailImage(
     onClick: () -> Unit
 ) {
     val imageUrl = "https://res.cloudinary.com/dovupsygm/image/upload/w_150,h_150,c_fill/$imageId"
-    val borderColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+    val borderColor =
+        if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
 
     Box(
         modifier = Modifier
             .size(80.dp)
             .clip(MaterialTheme.shapes.medium)
-            .border(BorderStroke(if (isSelected) 2.dp else 1.dp, borderColor), MaterialTheme.shapes.medium)
+            .border(
+                BorderStroke(if (isSelected) 2.dp else 1.dp, borderColor),
+                MaterialTheme.shapes.medium
+            )
             .clickable(onClick = onClick)
     ) {
         Image(

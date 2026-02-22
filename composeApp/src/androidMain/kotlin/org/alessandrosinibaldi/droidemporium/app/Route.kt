@@ -23,4 +23,7 @@ sealed class Route(val path: String) {
         val productId: String
     ) : Route("product_detail/{productId}")
 
+    @Serializable
+    data object Cart : Route("cart")
+
 }

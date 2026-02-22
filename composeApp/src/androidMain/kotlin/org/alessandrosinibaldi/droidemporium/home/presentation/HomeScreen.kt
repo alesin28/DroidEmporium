@@ -81,8 +81,12 @@ fun HomeScreen(
             Route.ProductList(showNewest = true)
         )
     }
-    val onProductClick: (String) -> Unit = {}
-    val onCartClick: () -> Unit = { }
+    val onProductClick: (String) -> Unit = { productId ->
+        navController.navigate(Route.ProductDetail(productId = productId))
+    }
+    val onCartClick: () -> Unit = {
+        navController.navigate(Route.Cart)
+    }
 
     HomeScreenContent(
         isLoading = state.isLoading,
@@ -135,7 +139,9 @@ fun HomeScreenContent(
             }
         } else {
             LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
                 contentPadding = PaddingValues(vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
@@ -166,7 +172,9 @@ fun HomeScreenContent(
                 item {
                     Column {
                         Row(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {

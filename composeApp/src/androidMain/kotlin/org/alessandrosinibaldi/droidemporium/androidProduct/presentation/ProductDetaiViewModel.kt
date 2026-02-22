@@ -17,6 +17,7 @@ import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
 import org.alessandrosinibaldi.droidemporium.commonReview.domain.Review
 import org.alessandrosinibaldi.droidemporium.commonReview.domain.ReviewRepository
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
+import kotlinx.coroutines.flow.firstOrNull
 
 class ProductDetailViewModel(
     private val productId: String,
@@ -29,6 +30,11 @@ class ProductDetailViewModel(
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading = _isLoading.asStateFlow()
+    private val _isAddingToCart = MutableStateFlow(false)
+    val isAddingToCart = _isAddingToCart.asStateFlow()
+
+    private val _cartMessage = MutableStateFlow<String?>(null)
+    val cartMessage = _cartMessage.asStateFlow()
 
     private val _product = MutableStateFlow<Product?>(null)
     val product = _product.asStateFlow()
@@ -85,6 +91,39 @@ class ProductDetailViewModel(
 
             _isLoading.value = false
         }
+    }
+
+    fun addToCart() {
+        val currentProduct = _product.value ?: return
+
+        viewModelScope.launch {
+            _isAddingToCart.value = true
+
+            val user = authRepository.getCurrentUser().firstOrNull()
+
+            if (user == null) {
+                _cartMessage.value = "You must be logged in to add items to the cart."
+                _isAddingToCart.value = false
+                return@launch
+            }
+
+            val result = cartRepository.addToCart(
+                clientId = user.id,
+                productId = currentProduct.id,
+                quantity = 1
+            )
+
+            when (result) {
+                is Result.Success -> _cartMessage.value = "Added to cart."
+                is Result.Failure -> _cartMessage.value = "Failed to add to cart."
+            }
+
+            _isAddingToCart.value = false
+        }
+    }
+
+    fun onCartMessageShown() {
+        _cartMessage.value = null
     }
 
 }

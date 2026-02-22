@@ -4,6 +4,7 @@ import org.alessandrosinibaldi.droidemporium.androidAuth.data.FirestoreAuthRepos
 import org.alessandrosinibaldi.droidemporium.androidAuth.domain.AuthRepository
 import org.alessandrosinibaldi.droidemporium.androidAuth.presentation.AuthViewModel
 import org.alessandrosinibaldi.droidemporium.androidCart.data.FirestoreCartRepository
+import org.alessandrosinibaldi.droidemporium.androidCart.presentation.CartViewModel
 import org.alessandrosinibaldi.droidemporium.androidProduct.data.ClientFirestoreProductRepository
 import org.alessandrosinibaldi.droidemporium.androidProduct.domain.ClientProductRepository
 import org.alessandrosinibaldi.droidemporium.androidProduct.presentation.ProductDetailViewModel
@@ -33,6 +34,8 @@ val androidAppModule = module {
 
     viewModelOf(::AuthViewModel)
     viewModelOf(::HomeViewModel)
+    viewModelOf(::CartViewModel)
+
 
     viewModel { params ->
         ProductListViewModel(

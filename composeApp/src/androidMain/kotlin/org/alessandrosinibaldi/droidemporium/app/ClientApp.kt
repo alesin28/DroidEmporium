@@ -8,6 +8,7 @@ import androidx.navigation.toRoute
 import org.alessandrosinibaldi.droidemporium.androidProduct.presentation.ProductDetailScreen
 import org.alessandrosinibaldi.droidemporium.home.presentation.HomeScreen
 import org.alessandrosinibaldi.droidemporium.androidProduct.presentation.ProductListScreen
+import org.alessandrosinibaldi.droidemporium.androidCart.presentation.CartScreen
 
 @Composable
 fun ClientApp() {
@@ -39,6 +40,15 @@ fun ClientApp() {
                 navController = navController
             )
         }
-    }
 
+        composable<Route.Cart> {
+            CartScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToCheckout = {
+                    /* TODO */
+                })
+
+        }
+
+    }
 }
