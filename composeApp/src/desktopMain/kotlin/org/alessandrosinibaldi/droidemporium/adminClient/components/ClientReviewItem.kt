@@ -18,11 +18,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import kotlinx.datetime.toJavaInstant
 import org.alessandrosinibaldi.droidemporium.commonReview.domain.Review
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.time.toJavaInstant
 
 @Composable
 fun ClientReviewItem(review: Review, onProductClick: (String) -> Unit) {

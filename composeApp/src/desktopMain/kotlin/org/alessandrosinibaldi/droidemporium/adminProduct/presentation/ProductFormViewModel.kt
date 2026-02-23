@@ -20,6 +20,8 @@ import org.alessandrosinibaldi.droidemporium.commonCategory.domain.CategoryRepos
 import org.alessandrosinibaldi.droidemporium.core.config.CloudinaryConfig
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
 import java.io.File
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 sealed interface ProductFormEvent {
     data object NavigateBack : ProductFormEvent
@@ -51,6 +53,7 @@ class ProductFormViewModel(
     val selectedLocalFiles = mutableStateListOf<File>()
     val existingImageIds = mutableStateListOf<String>()
     var defaultImageId by mutableStateOf("")
+    var createdAt by mutableStateOf<Instant>(Clock.System.now())
 
     init {
         loadAvailableCategories()
@@ -122,7 +125,8 @@ class ProductFormViewModel(
                         stock = stock.toIntOrNull() ?: 0,
                         isActive = isActive, categoryId = categoryId ?: "",
                         imageIds = allImageIds,
-                        defaultImageId = finalDefaultImageId
+                        defaultImageId = finalDefaultImageId,
+                        createdAt = createdAt
                     )
                     adminProductRepository.updateProduct(updatedProduct)
                 } else {
@@ -170,6 +174,7 @@ class ProductFormViewModel(
                             existingImageIds.clear()
                             existingImageIds.addAll(product.imageIds)
                             defaultImageId = product.defaultImageId
+                            createdAt = product.createdAt
                         } ?: println("Product with ID $id not found.")
                     }
 

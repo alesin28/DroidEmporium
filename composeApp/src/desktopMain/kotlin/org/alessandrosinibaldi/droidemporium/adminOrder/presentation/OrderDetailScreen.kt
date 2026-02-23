@@ -18,7 +18,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import kotlinx.datetime.toJavaInstant
 import org.alessandrosinibaldi.droidemporium.app.Route
 import org.alessandrosinibaldi.droidemporium.commonClient.domain.Client
 import org.alessandrosinibaldi.droidemporium.commonOrder.domain.Order
@@ -28,6 +27,7 @@ import org.koin.core.parameter.parametersOf
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.time.toJavaInstant
 
 @Composable
 fun OrderDetailScreen(

@@ -17,11 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import kotlinx.datetime.toJavaInstant
 import org.alessandrosinibaldi.droidemporium.commonOrder.domain.Order
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.time.toJavaInstant
 
 @Composable
 fun ClientOrderItem(order: Order, onOrderClick: (String) -> Unit) {

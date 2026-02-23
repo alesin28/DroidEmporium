@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import org.alessandrosinibaldi.droidemporium.adminCategory.presentation.CategoryListScreen
 import org.alessandrosinibaldi.droidemporium.adminClient.presentation.ClientListScreen
 import org.alessandrosinibaldi.droidemporium.adminOrder.presentation.OrderDetailScreen
@@ -12,7 +13,6 @@ import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductDe
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductFormScreen
 import org.alessandrosinibaldi.droidemporium.adminProduct.presentation.ProductScreen
 import org.alessandrosinibaldi.droidemporium.adminClient.presentation.ClientDetailScreen
-
 
 
 @Composable
@@ -45,13 +45,12 @@ fun AdminApp() {
         }
 
         composable<Route.ProductDetail> { backStackEntry ->
-            val productId = backStackEntry.arguments?.getString("productId")
+            val args = backStackEntry.toRoute<Route.ProductDetail>()
             ProductDetailScreen(
-                productId = productId,
+                productId = args.productId,
                 navController = navController
             )
         }
-
 
         composable<Route.ProductAdd> {
             ProductFormScreen(
@@ -61,18 +60,15 @@ fun AdminApp() {
         }
 
         composable<Route.ProductEdit> { backStackEntry ->
-            val productId = backStackEntry.arguments?.getString("productId")
-
+            val args = backStackEntry.toRoute<Route.ProductEdit>()
             ProductFormScreen(
-                productId = productId,
+                productId = args.productId,
                 navController = navController
             )
-
         }
 
         composable<Route.CategoryList> {
             CategoryListScreen(navController = navController)
-
         }
 
         composable<Route.ClientList> {
@@ -80,9 +76,9 @@ fun AdminApp() {
         }
 
         composable<Route.ClientDetail> { backStackEntry ->
-            val clientId = backStackEntry.arguments?.getString("clientId")
+            val args = backStackEntry.toRoute<Route.ClientDetail>()
             ClientDetailScreen(
-                clientId = clientId,
+                clientId = args.clientId,
                 navController = navController
             )
         }
@@ -92,12 +88,11 @@ fun AdminApp() {
         }
 
         composable<Route.OrderDetail> { backStackEntry ->
-            val orderId = backStackEntry.arguments?.getString("orderId")
+            val args = backStackEntry.toRoute<Route.OrderDetail>()
             OrderDetailScreen(
-                orderId = orderId,
+                orderId = args.orderId,
                 navController = navController
-                )
+            )
         }
-
     }
 }

@@ -28,8 +28,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import kotlinx.datetime.Instant
-import kotlinx.datetime.toJavaInstant
 import org.alessandrosinibaldi.droidemporium.adminOrder.presentation.OrderListViewModel.SortColumn
 import org.alessandrosinibaldi.droidemporium.adminOrder.presentation.OrderListViewModel.SortDirection
 import org.alessandrosinibaldi.droidemporium.app.Route
@@ -41,6 +39,8 @@ import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import androidx.compose.foundation.interaction.PressInteraction
+import kotlin.time.Instant
+import kotlin.time.toJavaInstant
 
 
 @Composable
