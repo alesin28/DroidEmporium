@@ -47,7 +47,8 @@ fun ProductListScreen(
         products = products,
         isLoading = isLoading,
         searchQuery = searchQuery,
-        onSearchQueryChange = viewModel::onSearchQueryChange
+        onSearchQueryChange = viewModel::onSearchQueryChange,
+        onSortOptionChange = viewModel::updateSortOption
     )
 }
 
@@ -60,8 +61,12 @@ fun ProductListScreenContent(
     products: List<Product>,
     isLoading: Boolean,
     searchQuery: String,
-    onSearchQueryChange: (String) -> Unit
+    onSearchQueryChange: (String) -> Unit,
+    onSortOptionChange: (SortOption) -> Unit
 ) {
+
+    var showSortMenu by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -89,8 +94,43 @@ fun ProductListScreenContent(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* TODO */ }) {
-                        Icon(Icons.Default.FilterList, contentDescription = "Filter Products")
+                    Box {
+                        IconButton(onClick = { showSortMenu = true }) {
+                            Icon(Icons.Default.FilterList, contentDescription = "Sort Products")
+                        }
+                        DropdownMenu(
+                            expanded = showSortMenu,
+                            onDismissRequest = { showSortMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Name (A-Z)") },
+                                onClick = {
+                                    onSortOptionChange(SortOption.NAME_ASC)
+                                    showSortMenu = false
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Name (Z-A)") },
+                                onClick = {
+                                    onSortOptionChange(SortOption.NAME_DESC)
+                                    showSortMenu = false
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Price (Low to High)") },
+                                onClick = {
+                                    onSortOptionChange(SortOption.PRICE_ASC)
+                                    showSortMenu = false
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Price (High to Low)") },
+                                onClick = {
+                                    onSortOptionChange(SortOption.PRICE_DESC)
+                                    showSortMenu = false
+                                }
+                            )
+                        }
                     }
                 }
             )

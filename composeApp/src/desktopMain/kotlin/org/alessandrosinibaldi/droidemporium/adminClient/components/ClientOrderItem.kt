@@ -35,7 +35,7 @@ fun ClientOrderItem(order: Order, onOrderClick: (String) -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
                 Text(
                     "Order #${order.id}",
                     style = MaterialTheme.typography.bodyLarge,

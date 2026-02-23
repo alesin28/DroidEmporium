@@ -325,11 +325,11 @@ fun orderListScreenContent(
                     }
                     item {
                         Text("Order Date", style = MaterialTheme.typography.titleSmall)
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             OutlinedTextField(
                                 value = formatInstant(startDate),
                                 onValueChange = {},
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier.fillMaxWidth(),
                                 label = { Text("Start Date") },
                                 placeholder = { Text("YYYY-MM-DD") },
                                 readOnly = true,
@@ -364,7 +364,7 @@ fun orderListScreenContent(
                             OutlinedTextField(
                                 value = formatInstant(endDate),
                                 onValueChange = {},
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier.fillMaxWidth(),
                                 label = { Text("End Date") },
                                 placeholder = { Text("YYYY-MM-DD") },
                                 readOnly = true,

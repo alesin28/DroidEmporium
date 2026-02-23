@@ -10,15 +10,14 @@ import org.alessandrosinibaldi.droidemporium.commonCategory.domain.CategoryRepos
 import org.alessandrosinibaldi.droidemporium.commonProduct.domain.Product
 import org.alessandrosinibaldi.droidemporium.core.domain.Result
 
-
 enum class SortOption {
-    RELEVANCE, NEWEST, PRICE_ASC, PRICE_DESC
+    NONE, NAME_ASC, NAME_DESC, PRICE_ASC, PRICE_DESC
 }
 
 data class FilterState(
     val categoryIds: Set<String> = emptySet(),
-    val minPrice: Double? = null,
-    val maxPrice: Double? = null
+    // val minPrice: Double? = null,
+    // val maxPrice: Double? = null
 )
 
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
@@ -41,9 +40,7 @@ class ProductListViewModel(
     )
     val filterState = _filterState.asStateFlow()
 
-    private val _sortOption = MutableStateFlow(
-        if (showNewest) SortOption.NEWEST else SortOption.RELEVANCE
-    )
+    private val _sortOption = MutableStateFlow(SortOption.NONE)
     val sortOption = _sortOption.asStateFlow()
 
     private val _screenTitle = MutableStateFlow("")
@@ -64,23 +61,19 @@ class ProductListViewModel(
                 query.isNotBlank() -> {
                     clientProductRepository.searchProducts(query)
                 }
-
                 filters.categoryIds.isNotEmpty() -> {
                     val categoryIdToQuery = filters.categoryIds.first()
                     clientProductRepository.getProductsByCategory(categoryIdToQuery)
                 }
-
                 showNewest -> {
                     clientProductRepository.getNewestProducts(50)
                 }
-
                 else -> {
                     flowOf(Result.Success(emptyList()))
                 }
             }
 
             sourceFlow.map { result ->
-
                 val productsList = when (result) {
                     is Result.Success -> result.data
                     is Result.Failure -> emptyList()
@@ -89,9 +82,7 @@ class ProductListViewModel(
                 applyFiltersAndSorting(productsList, filters, sort)
             }
         }
-        .onEach { finalProductList ->
-            isLoading.value = false
-        }
+        .onEach { isLoading.value = false }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -113,46 +104,47 @@ class ProductListViewModel(
         sort: SortOption
     ): List<Product> {
         val filteredList = productsList.filter { product ->
-            val priceMatch = (filters.minPrice == null || product.price >= filters.minPrice) &&
-                    (filters.maxPrice == null || product.price <= filters.maxPrice)
+            // val priceMatch = (filters.minPrice == null || product.price >= filters.minPrice) &&
+            //        (filters.maxPrice == null || product.price <= filters.maxPrice)
 
             val categoryMatch = if (filters.categoryIds.isEmpty()) {
                 true
             } else {
                 filters.categoryIds.contains(product.categoryId)
             }
-            priceMatch && categoryMatch
+            categoryMatch // && priceMatch
         }
 
         return when (sort) {
-            SortOption.RELEVANCE -> filteredList
-            SortOption.NEWEST -> filteredList.sortedByDescending { it.createdAt }
+            SortOption.NONE -> filteredList
+            SortOption.NAME_ASC -> filteredList.sortedBy { it.name }
+            SortOption.NAME_DESC -> filteredList.sortedByDescending { it.name }
             SortOption.PRICE_ASC -> filteredList.sortedBy { it.price }
             SortOption.PRICE_DESC -> filteredList.sortedByDescending { it.price }
         }
     }
 
-
     fun onSearchQueryChange(newQuery: String) {
         _searchQuery.value = newQuery
-    }
-
-    fun updateSelectedCategories(categoryId: String, isSelected: Boolean) {
-        _filterState.update { currentState ->
-            val newCategories = if (isSelected) {
-                currentState.categoryIds + categoryId
-            } else {
-                currentState.categoryIds - categoryId
-            }
-            currentState.copy(categoryIds = newCategories)
-        }
-    }
-
-    fun updatePriceRange(min: Double?, max: Double?) {
-        _filterState.update { it.copy(minPrice = min, maxPrice = max) }
     }
 
     fun updateSortOption(sortOption: SortOption) {
         _sortOption.value = sortOption
     }
+
+
+    // fun updateSelectedCategories(categoryId: String, isSelected: Boolean) {
+    //     _filterState.update { currentState ->
+    //         val newCategories = if (isSelected) {
+    //             currentState.categoryIds + categoryId
+    //         } else {
+    //             currentState.categoryIds - categoryId
+    //         }
+    //         currentState.copy(categoryIds = newCategories)
+    //     }
+    // }
+
+    // fun updatePriceRange(min: Double?, max: Double?) {
+    //     _filterState.update { it.copy(minPrice = min, maxPrice = max) }
+    // }
 }
