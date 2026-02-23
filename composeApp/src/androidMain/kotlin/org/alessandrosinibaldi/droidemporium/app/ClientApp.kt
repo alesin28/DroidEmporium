@@ -10,7 +10,12 @@ import org.alessandrosinibaldi.droidemporium.home.presentation.HomeScreen
 import org.alessandrosinibaldi.droidemporium.androidProduct.presentation.ProductListScreen
 import org.alessandrosinibaldi.droidemporium.androidCart.presentation.CartScreen
 import org.alessandrosinibaldi.droidemporium.androidAddress.presentation.AddressFormScreen
+import org.alessandrosinibaldi.droidemporium.androidAddress.presentation.AddressListScreen
 import org.alessandrosinibaldi.droidemporium.androidCart.presentation.CheckoutScreen
+import org.alessandrosinibaldi.droidemporium.androidClient.presentation.ProfileScreen
+import org.alessandrosinibaldi.droidemporium.androidOrder.presentation.ClientOrderDetailScreen
+import org.alessandrosinibaldi.droidemporium.androidOrder.presentation.OrderHistoryScreen
+import org.alessandrosinibaldi.droidemporium.androidReview.presentation.ReviewFormScreen
 
 @Composable
 fun ClientApp() {
@@ -68,6 +73,55 @@ fun ClientApp() {
             val args = backStackEntry.toRoute<Route.AddressForm>()
             AddressFormScreen(
                 addressId = args.addressId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable<Route.Profile> {
+            ProfileScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToOrders = { navController.navigate(Route.OrderHistory) },
+                onNavigateToAddresses = { navController.navigate(Route.AddressList) }
+            )
+        }
+
+        composable<Route.OrderHistory> {
+            OrderHistoryScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToOrderDetail = { orderId ->
+                    navController.navigate(Route.OrderDetail(orderId))
+                }
+            )
+        }
+
+        composable<Route.AddressList> {
+            AddressListScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToAddressForm = { addressId ->
+                    navController.navigate(Route.AddressForm(addressId))
+                }
+            )
+        }
+
+        composable<Route.OrderDetail> { backStackEntry ->
+            val args = backStackEntry.toRoute<Route.OrderDetail>()
+            ClientOrderDetailScreen(
+                orderId = args.orderId,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToProduct = { productId ->
+                    navController.navigate(Route.ProductDetail(productId))
+                },
+                onNavigateToReviewForm = { productId, productName ->
+                    navController.navigate(Route.AddReview(productId, productName))
+                }
+            )
+        }
+
+        composable<Route.AddReview> { backStackEntry ->
+            val args = backStackEntry.toRoute<Route.AddReview>()
+            ReviewFormScreen(
+                productId = args.productId,
+                productName = args.productName,
                 onNavigateBack = { navController.popBackStack() }
             )
         }

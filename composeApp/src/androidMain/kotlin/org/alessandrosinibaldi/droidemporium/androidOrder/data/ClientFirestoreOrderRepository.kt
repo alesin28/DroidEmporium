@@ -127,4 +127,29 @@ class ClientFirestoreOrderRepository : ClientOrderRepository {
             emit(Result.Failure(e))
         }
     }
+
+    override fun getOrdersForClient(clientId: String): Flow<Result<List<Order>>> = flow {
+        try {
+            ordersCollection.where { "clientId" equalTo clientId }.snapshots.collect { querySnapshot ->
+                val userOrders = coroutineScope {
+                    querySnapshot.documents.map { orderDoc ->
+                        async {
+                            val linesSnapshot = orderDoc.reference.collection("orderLines").get()
+                            val domainLines = linesSnapshot.documents.map { lineDoc ->
+                                lineDoc.data<OrderLineDto>().toDomain(id = lineDoc.id)
+                            }
+                            val orderDto = orderDoc.data<OrderDto>()
+                            orderDto.toDomain(id = orderDoc.id, lines = domainLines)
+                        }
+                    }
+                }.awaitAll().sortedByDescending { it.orderDate }
+
+                emit(Result.Success(userOrders))
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emit(Result.Failure(e))
+        }
+    }
+
 }

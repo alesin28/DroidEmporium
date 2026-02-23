@@ -34,4 +34,19 @@ sealed class Route(val path: String) {
         val addressId: String? = null
     ) : Route("address_form")
 
+    @Serializable
+    data object Profile : Route("profile")
+
+    @Serializable
+    data object OrderHistory : Route("order_history")
+
+    @Serializable
+    data object AddressList : Route("address_list")
+
+    @Serializable
+    data class OrderDetail(val orderId: String) : Route("order_detail/{orderId}")
+
+    @Serializable
+    data class AddReview(val productId: String, val productName: String) :
+        Route("add_review/{productId}")
 }

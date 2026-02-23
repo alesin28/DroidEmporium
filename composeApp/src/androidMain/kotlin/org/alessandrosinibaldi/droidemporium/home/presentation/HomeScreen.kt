@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,7 +51,9 @@ fun HomeScreen(
     navController: NavHostController
 ) {
     val state by viewModel.uiState.collectAsState()
-
+    val onProfileClick: () -> Unit = {
+        navController.navigate(Route.Profile)
+    }
 
     val onCategoryClick: (Category) -> Unit = { category ->
         navController.navigate(
@@ -96,6 +99,7 @@ fun HomeScreen(
         onProductClick = onProductClick,
         onSearchClick = onSearchClick,
         onCartClick = onCartClick,
+        onProfileClick = onProfileClick,
         onSeeAllNewestClick = onSeeAllNewestClick
     )
 }
@@ -110,6 +114,7 @@ fun HomeScreenContent(
     onProductClick: (String) -> Unit,
     onSearchClick: (String) -> Unit,
     onCartClick: () -> Unit,
+    onProfileClick: () -> Unit,
     onSeeAllNewestClick: () -> Unit
 ) {
     Scaffold(
@@ -122,6 +127,9 @@ fun HomeScreenContent(
                     containerColor = MaterialTheme.colorScheme.surface
                 ),
                 actions = {
+                    IconButton(onClick = onProfileClick) {
+                        Icon(Icons.Default.Person, contentDescription = "View Profile")
+                    }
                     IconButton(onClick = onCartClick) {
                         Icon(Icons.Default.ShoppingCart, contentDescription = "View Cart")
                     }
